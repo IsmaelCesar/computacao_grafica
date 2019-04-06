@@ -120,29 +120,43 @@ public class Linear {
 				newA = remove_row_column(a,0,j);
 				det +=  Math.pow(-1, 0-j)*a.getItem(0, j) * determinant(newA);
 			}
-		}
-			
+		}			
 		return det;
 	}
 	
-	public static Array barycentric_coordinates(Array A,Array B, Array C) {
+	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {
 		Array result = null;
 		A = transpose_for_barycentric(A);
 		B = transpose_for_barycentric(B);
 		C = transpose_for_barycentric(C);
+		P = transpose_for_barycentric(P);
 		
 		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
 			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {				
-				//Creating values that sum up to 1
-				int dimention = A.getDim();
-				Array a = null;
-				double r [][] = new double [1][dimention];
-				for(int i=0;i< dimention;i++) {
-					r[0][i] += 1/((double)dimention);
-				}
+				//creating matrix
+				Array T = new Array(A.getDim(),B.getDim());
+				double aux [][] = {{P.getItem(0, 0) - C.getItem(0, 0),P.getItem(0, 1) - C.getItem(0, 1)}};
+				Array Aux = new Array(aux);
+				T.setItem(A.getItem(0, 0) - C.getItem(0,0), 0, 0);
+				T.setItem(B.getItem(0, 0) - C.getItem(0,0), 0, 1);				
+				T.setItem(A.getItem(0, 1) - C.getItem(0,1), 1, 0);
+				T.setItem(B.getItem(0, 1) - C.getItem(0,1), 1, 1);
 				
-				Array coeficients = new Array(r);				
+				//creating inverse matrix
+				double t_inv[][] = {{T.getItem(1,1),-T.getItem(0,1)},
+									{-T.getItem(1, 0),T.getItem(0,0)}};
 				
+				Array T_inv = new Array(t_inv);
+				T_inv = dotScalar(1/determinant(T),T_inv);
+				
+				Array values = dot(T_inv, Aux.t());
+				values = values.t();
+				double psi =1 - values.getItem(0, 0) - values.getItem(0,1);
+				Array baricords = new Array(1,3);
+				baricords.setItem(values.getItem(0, 0), 0, 0);
+				baricords.setItem(values.getItem(0, 1), 0, 1);
+				baricords.setItem(psi, 0, 2);
+				result = baricords;
 			}
 		}
 		
