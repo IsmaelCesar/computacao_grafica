@@ -1,4 +1,6 @@
 package beans;
+import java.lang.Math;
+
 
 public class Linear {
 	public static Array dot(Array a, Array b) {
@@ -78,4 +80,74 @@ public class Linear {
 			throw new IllegalArgumentException("Arrays dimentions do not match");
 		return result;
 	}
+	
+	private static Array transpose_for_barycentric(Array A) {
+		
+		if(A.getRows_dim() != 1) {
+			return A.t();
+		}
+		return A;
+	}
+	
+	//Auxiliary method for removing the row i and column j
+	private static Array remove_row_column(Array A,int i,int j) {
+		Array newArray = new Array(A.getRows_dim()-1,A.getDim()-1);
+		int w = 0, s =0;
+		for(int k = 0; k<A.getRows_dim(); k++) {
+			s=0;
+			for(int l =0; l<A.getDim();l++) {
+				if(k!=i && l!=j) {
+					newArray.setItem(A.getItem(k, l), w, s);
+					s++;					
+				}
+			}			
+			if(k!= i)	
+				w++;
+		}
+		
+		return newArray;
+		
+	}
+	
+	public static double determinant(Array a) {
+		double det = 0;
+		if(a.getRows_dim()== 2 && a.getDim() == 2) {
+			det = (a.getItem(0, 0) + a.getItem(1, 1)) - (a.getItem(0, 1) + a.getItem(1, 0));
+		}
+		else {
+			Array newA = null;
+			for(int j = 0; j < a.getRows_dim();j++) {
+				newA = remove_row_column(a,0,j);
+				det +=  Math.pow(-1, 0-j)*a.getItem(0, j) * determinant(newA);
+			}
+		}
+			
+		return det;
+	}
+	
+	public static Array barycentric_coordinates(Array A,Array B, Array C) {
+		Array result = null;
+		A = transpose_for_barycentric(A);
+		B = transpose_for_barycentric(B);
+		C = transpose_for_barycentric(C);
+		
+		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
+			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {				
+				//Creating values that sum up to 1
+				int dimention = A.getDim();
+				Array a = null;
+				double r [][] = new double [1][dimention];
+				for(int i=0;i< dimention;i++) {
+					r[0][i] += 1/((double)dimention);
+				}
+				
+				Array coeficients = new Array(r);				
+				
+			}
+		}
+		
+		return result;
+		
+	}
+	
 }

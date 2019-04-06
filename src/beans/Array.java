@@ -84,6 +84,37 @@ public class Array {
 		return r;
 	}
 	
+	public double elementwiseSum() {
+		double result =0;
+		
+		for(int i =0; i < this.rows_dim;i++) {
+			for(int j =0; j < this.dim;j++) {
+				result+= this.values[i][j];
+			}
+		}
+		
+		return result;	
+	}
+	
+	public double getItem(int i,int j) {
+		double value = 0;
+		if(i< this.rows_dim && j < this.dim) {
+			value = this.values[i][j];
+		}
+		else
+			throw new IndexOutOfBoundsException();
+		return value;
+	}
+	
+	public void setItem(double item,int i,int j) {		
+		if(i< this.rows_dim && j < this.dim) {
+			this.values[i][j] = item;
+		}
+		else
+			throw new IndexOutOfBoundsException();		
+	}
+	
+	
 	public String toString() {
 		String aString = "[";
 		for(int i= 0; i < this.rows_dim;i++) {
