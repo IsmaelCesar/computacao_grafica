@@ -94,7 +94,7 @@ public class Array {
 				else
 					aString += String.valueOf(this.values[i][j]);
 			}
-			if(this.rows_dim !=1)
+			if(i != this.rows_dim-1)
 				aString += "]\n";
 			else
 				aString += "]";
