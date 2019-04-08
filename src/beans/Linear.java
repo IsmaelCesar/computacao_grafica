@@ -81,7 +81,7 @@ public class Linear {
 		return result;
 	}
 	
-	private static Array transpose_for_barycentric(Array A) {
+	private static Array transpose_for_procedure(Array A) {
 		
 		if(A.getRows_dim() != 1) {
 			return A.t();
@@ -126,10 +126,10 @@ public class Linear {
 	
 	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {
 		Array result = null;
-		A = transpose_for_barycentric(A);
-		B = transpose_for_barycentric(B);
-		C = transpose_for_barycentric(C);
-		P = transpose_for_barycentric(P);
+		A = transpose_for_procedure(A);
+		B = transpose_for_procedure(B);
+		C = transpose_for_procedure(C);
+		P = transpose_for_procedure(P);
 		
 		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
 			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {				
@@ -159,9 +159,52 @@ public class Linear {
 				result = baricords;
 			}
 		}
-		
-		return result;
-		
+		return result;		
 	}
 	
+	public static Array getGeometricFromBarycentric(Array BC,Array A,Array B, Array C) {
+		Array result = null;
+		A = transpose_for_procedure(A);
+		B = transpose_for_procedure(B);
+		C = transpose_for_procedure(C);
+		BC = transpose_for_procedure(BC);
+		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
+			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() && BC.getDim() == 3 ) {
+				 
+				Array P = new Array(1,B.getDim());
+				double x0 = (A.getItem(0, 0)*BC.getItem(0, 0) + 
+						     B.getItem(0, 0)*BC.getItem(0, 0) + 
+						     C.getItem(0, 0)*BC.getItem(0, 0));
+				double y0 = (A.getItem(0, 1)*BC.getItem(0, 1) + 
+						     B.getItem(0, 1)*BC.getItem(0, 1) + 
+						     C.getItem(0, 1)*BC.getItem(0, 1));
+				P.setItem(x0, 0,0);
+				P.setItem(y0, 0,1);
+				result=P;
+			}
+		}
+		return result;
+	}
+	
+	public static Array cross(Array A, Array B) {
+		//It only works for tridimentional arrays
+		A = transpose_for_procedure(A);
+		B = transpose_for_procedure(B);
+		Array result = null;
+		
+		if(A.getRows_dim() == 1 && B.getRows_dim() == 1) {
+			if(A.getDim()==3 && B.getDim()==3) {
+				result = new Array(1,A.getDim());				
+				result.setItem(A.getItem(0, 1)*B.getItem(0, 2) - A.getItem(0, 2)*B.getItem(0, 1) , 0, 0);
+				result.setItem(A.getItem(0, 0)*B.getItem(0, 2) - A.getItem(0, 2)*B.getItem(0, 0) , 0, 1);
+				result.setItem(A.getItem(0, 0)*B.getItem(0, 1) - A.getItem(0, 1)*B.getItem(0, 0) , 0, 2);
+				
+			}
+			else
+				throw new IllegalArgumentException("The input arrays dimention do not match.");
+		}
+		else
+			throw new IllegalArgumentException("There is an input array that is not unidimentional.");
+		return result;
+	}
 }
