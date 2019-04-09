@@ -3,9 +3,8 @@ import beans.Array;
 import beans.Linear;
 import beans.Linear.Projections;
 import beans.ShapeReader;
-import java.io.File;
 
-public class Main {
+public class Questionary {
 	
 	public static void questao1_letraA() {
 		double a[][] ={{1.5,2.5,3.5},
@@ -78,10 +77,5 @@ public class Main {
 		Array B = new Array(b);		
 		Array C = new Array(c);
 		System.out.println(Linear.getGeometricFromBarycentric(Barycentric, A, B, C));		
-	}
-	
-	public static void main(String []args) {
-		ShapeReader sr = new ShapeReader();
-		System.out.println(sr.read("vaso.byu"));		
 	}
 }
