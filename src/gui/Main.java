@@ -82,6 +82,6 @@ public class Main {
 	
 	public static void main(String []args) {
 		ShapeReader sr = new ShapeReader();
-		sr.read("teste_leitura.byu");		
+		System.out.println(sr.read("vaso.byu"));		
 	}
 }

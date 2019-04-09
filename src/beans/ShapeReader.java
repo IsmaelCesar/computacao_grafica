@@ -46,7 +46,7 @@ public class ShapeReader {
 				
 				mShape = new Shape(n_vertices,n_triangles);
 				
-				//Reading vertices and triangles
+				//Reading vertices
 				values =  br.readLine();
 				while(values != null) {
 					//Extracting other numbers from string
@@ -56,7 +56,7 @@ public class ShapeReader {
 					for(int v = 0; v < this.n_vertices; v++) {
 						double x =0,y=0,z=0;
 						int value_opc = 0;
-						for(int i = 0; i == values.length();i++) {
+						for(int i = 0; i < values.length();i++) {
 							if(values.charAt(i) != ' ') {
 								numbers += values.charAt(i);
 							}
@@ -81,29 +81,30 @@ public class ShapeReader {
 						double coordinates[][]= {{x,y,z}};
 						mShape.addVertex(new Array(coordinates));
 						
-						values = br.readLine() + " ";
+						values = br.readLine();
+						if(values != null)
+							values += " ";
 					}
 					
 					//Reading Triangles
 					numbers="";
-					values = br.readLine()+" ";
 					for(int t = 0 ; t < this.n_triangles;t++) {
 						
 						int vertices[] = new int[3];
 						int v_opc = 0;
-						int v_index = 0;
-						for(int i = 0; i == values.length();i++) {
+						for(int i = 0; i < values.length();i++) {
 							if(values.charAt(i) != ' ') {
 								numbers += values.charAt(i);
 							}
-							else {
-								v_index = Integer.valueOf(numbers);
-								vertices[v_opc++] = v_index;
+							else {							 
+								vertices[v_opc++] = Integer.valueOf(numbers);
 								numbers="";
 							}
 						}
 						mShape.addTriangle(vertices);
-						values = br.readLine()+" ";
+						values = br.readLine();
+						if(values != null)
+							values += " ";
 					}
 					values = br.readLine();
 				}
@@ -112,6 +113,7 @@ public class ShapeReader {
 		}
 		catch(Exception e) {
 			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}	
 		
 		return mShape;

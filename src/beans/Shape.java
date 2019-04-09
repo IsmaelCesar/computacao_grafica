@@ -10,8 +10,10 @@ public class Shape {
 	private int triangles[][];
 	
 	public Shape(int vertexes, int triangles) {
+		this.n_vertex= vertexes;
+		this.n_triangles = triangles;
 		this.vertexes = new Array [vertexes];
-		this.triangles = new int[triangles][vertexes];
+		this.triangles = new int[triangles][3];
 	}
 	
 	public Array getVertex(int i) {
@@ -60,7 +62,7 @@ public class Shape {
 			a = this.getVertex(v);
 			retorno += (String.valueOf(a.getItem(0, 0))+" "+
 			           String.valueOf(a.getItem(0, 1))+" "+
-			           String.valueOf(a.getItem(0, 1))+"\n");
+			           String.valueOf(a.getItem(0, 2))+"\n");
 		}
 		int indexes [];
 		for(int t = 0; t < this.n_triangles;t++) {
