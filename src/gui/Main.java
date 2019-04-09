@@ -1,6 +1,7 @@
 package gui;
 import beans.Array;
 import beans.Linear;
+import beans.ShapeReader;
 
 public class Main {
 	
@@ -78,6 +79,7 @@ public class Main {
 	}
 	
 	public static void main(String []args) {
-		questao1_letraD();	
+			ShapeReader sr = new ShapeReader();
+			sr.read("teste_leitura");
 	}
 }
