@@ -1,7 +1,9 @@
 package gui;
 import beans.Array;
 import beans.Linear;
+import beans.Linear.Projections;
 import beans.ShapeReader;
+import java.io.File;
 
 public class Main {
 	
@@ -73,13 +75,13 @@ public class Main {
 		double c [][]= {{1,1}};
 		Array Barycentric = new Array(p_cord);
 		Array A = new Array(a);
-		Array B = new Array(b);
+		Array B = new Array(b);		
 		Array C = new Array(c);
 		System.out.println(Linear.getGeometricFromBarycentric(Barycentric, A, B, C));		
 	}
 	
 	public static void main(String []args) {
-			ShapeReader sr = new ShapeReader();
-			sr.read("teste_leitura");
+		ShapeReader sr = new ShapeReader();
+		sr.read("teste_leitura.byu");		
 	}
 }

@@ -90,7 +90,7 @@ public class Linear {
 	}
 	
 	//Auxiliary method for removing the row i and column j
-	private static Array remove_row_column(Array A,int i,int j) {
+	protected static Array remove_row_column(Array A,int i,int j) {
 		Array newArray = new Array(A.getRows_dim()-1,A.getDim()-1);
 		int w = 0, s =0;
 		for(int k = 0; k<A.getRows_dim(); k++) {
@@ -206,5 +206,24 @@ public class Linear {
 		else
 			throw new IllegalArgumentException("There is an input array that is not unidimentional.");
 		return result;
+	}
+	
+	//Implementations of projections
+	public static class Projections{
+		
+		public static Array orthogonal(Array A) {
+			A = transpose_for_procedure(A);
+			Array result = null;
+			if(A.getRows_dim() == 1) {
+				result = new Array(A.getRows_dim(),A.getDim()-1);
+				for(int i = 0; i < result.getDim();i++) {
+					result.setItem(A.getItem(0, i), 0, i);
+				}
+			}
+			else
+				throw new IllegalArgumentException("The input array must be 1xn");
+			return result;
+		}
+		
 	}
 }
