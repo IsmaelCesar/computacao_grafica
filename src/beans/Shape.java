@@ -74,25 +74,13 @@ public class Shape {
 		
 		return retorno;
 	}
-	
-	public double getDimentionMaxValue(int i) {
-		double value = 0;
-		for(int v = 0; v < this.vertexes.length;v++) {
-			if(this.vertexes[v].getItem(0,i) > value)
-				value = this.vertexes[v].getItem(0,i);
-		}
-		return value;
+
+	public Array[] getVertexes() {
+		return vertexes;
 	}
-	
-	public double getDimentionMinValue(int i) {
-		
-		double value = this.vertexes[0].getItem(0, i);
-		
-		for(int v = 0; v < this.vertexes.length;v++) {
-			if(this.vertexes[v].getItem(0,i) < value)
-				value = this.vertexes[v].getItem(0,i);
-		}
-		return value;
+
+	public int[][] getTriangles() {
+		return triangles;
 	}
 	
 }

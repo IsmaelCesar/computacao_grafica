@@ -32,20 +32,51 @@ public class Screen extends Application{
 	Pane p = new Pane(canvas);
 	Scene mScene = new Scene(p);
 	
+	
+	public static double getDimentionMaxValue(Array vertexes[],int dim) {
+		double value= 0;
+			
+		for(int v = 0; v < vertexes.length;v++) {
+			if(vertexes[v].getItem(0,dim) > value)
+				value = vertexes[v].getItem(0,dim);
+		}
+		
+		return value;		
+	}
+	
+	public static double getDimentionMinValue(Array vertexes[],int dim) {
+		double value= 0;
+		value = vertexes[0].getItem(0,dim);
+		
+		for(int v = 0; v < vertexes.length;v++) {
+			if(vertexes[v].getItem(0,dim) < value)
+				value = vertexes[v].getItem(0,dim);
+		}		
+		return value;		
+	}
+	
+	public static Array[] applyOrthogonalProjectionToVertexSet(Shape s) {
+		Array values [] = new Array[s.getVertexes().length];		
+		for(int i = 0; i<s.getVertexes().length;i++) {
+			values[i] = Projections.orthogonal(s.getVertex(i));
+		}		
+		return values;	
+	}
+	
 	@SuppressWarnings("exports")
 	public void compute_coordinates_and_draw_pixels(Shape s,PixelWriter pw) {
-		double x_max = s.getDimentionMaxValue(0);
-		double x_min = s.getDimentionMinValue(0);
+		Array shapeVertices [] = applyOrthogonalProjectionToVertexSet(s);
+		double x_max = getDimentionMaxValue(shapeVertices,0);
+		double x_min = getDimentionMinValue(shapeVertices,0);
 		
-		double y_max = s.getDimentionMaxValue(1);
-		double y_min = s.getDimentionMinValue(1);
+		double y_max = getDimentionMaxValue(shapeVertices,1);
+		double y_min = getDimentionMinValue(shapeVertices,1);
 		Array v = null;
-		for(int i = 0; i < s.getN_vertex();i++) {
-			v = s.getVertex(i);
-			v = Projections.orthogonal(v);
+		for(int i = 0; i < shapeVertices.length;i++) {
+			
 			//normalization
-			double x = v.getItem(0, 0);
-			double y = v.getItem(0, 1);
+			double x = shapeVertices[i].getItem(0,0);
+			double y = shapeVertices[i].getItem(0,1);
 			
 			x = (x-x_min)/(x_max-x_min)*(width-1);
 			y = (y-y_min)/(y_max-y_min)*(height-1);
