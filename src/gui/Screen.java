@@ -18,12 +18,12 @@ import javafx.scene.paint.Color;
 public class Screen extends Application{
 
 	private String objects [] = {"calice2.byu",
-								"maca.byu",
-								"maca2.byu",
-								"vaso.byu",
-								"vaca.byu",
-								"piramide.byu",
-								"triangulo.byu"	};
+			"maca.byu",
+			"maca2.byu",
+			"vaso.byu",
+			"vaca.byu",
+			"piramide.byu",
+			"triangulo.byu"	};
 	String absolutePath = "/home/ismael/Documentos/Github/computacao_grafica/src/gui/fxml/";
 	
 	int width =512;
