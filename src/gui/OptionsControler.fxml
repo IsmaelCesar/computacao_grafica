@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SplitMenuButton?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="767.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1" fx:controller="gui.OptionsControler">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="767.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.OptionsControler">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="291.0" minWidth="10.0" prefWidth="177.0" />
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="291.0" minWidth="0.0" prefWidth="21.0" />
@@ -20,7 +20,7 @@
     <RowConstraints maxHeight="73.0" minHeight="0.0" prefHeight="8.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <Pane fx:id="shapeDisplayer" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: black;" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+      <Pane id="shapeDisplayer" fx:id="shapeDisplayer" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: black;" GridPane.columnIndex="2" GridPane.rowIndex="1" />
       <GridPane GridPane.rowIndex="1">
         <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="78.0" minWidth="10.0" prefWidth="15.0" />
@@ -32,12 +32,12 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <SplitMenuButton fx:id="shapeSelectior" mnemonicParsing="false" text="SplitMenuButton" GridPane.columnIndex="1">
+            <MenuButton id="shapeSelector" fx:id="shapeSelector" mnemonicParsing="false" prefHeight="26.0" prefWidth="174.0" text="Select Shape" GridPane.columnIndex="1">
               <items>
                 <MenuItem mnemonicParsing="false" text="Action 1" />
                 <MenuItem mnemonicParsing="false" text="Action 2" />
               </items>
-            </SplitMenuButton>
+            </MenuButton>
          </children>
       </GridPane>
    </children>
