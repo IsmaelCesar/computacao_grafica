@@ -64,7 +64,7 @@ public class OptionsControler implements Initializable{
 	}
 	
 	private void initializeMenuButton() {
-		int itemsN = 4;
+		int itemsN = 5;
 		ArrayList<MenuItem> mItems = new ArrayList<MenuItem>();
 			
 		for(int  i = 0; i < itemsN; i++) {
