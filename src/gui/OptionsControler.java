@@ -12,10 +12,10 @@ import javafx.fxml.Initializable;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 
 public class OptionsControler implements Initializable{
@@ -42,6 +42,28 @@ public class OptionsControler implements Initializable{
 	
 	@FXML
 	Canvas canvas;
+	
+	//Text Field
+	@FXML
+	TextField txtFieldN;
+	
+	@FXML
+	TextField txtFieldV;
+	
+	@FXML
+	TextField txtFieldU;
+	
+	@FXML
+	TextField txtFieldHX;
+	
+	@FXML
+	TextField txtFieldHY;
+	
+	@FXML
+	TextField txtFieldC;
+	
+	@FXML
+	Button btnCalculate;
 	
 	GraphicsContext gc;
 		
@@ -124,7 +146,6 @@ public class OptionsControler implements Initializable{
 		
 		double y_max = getDimentionMaxValue(shapeVertices,1);
 		double y_min = getDimentionMinValue(shapeVertices,1);
-		Array v = null;
 		for(int i = 0; i < shapeVertices.length;i++) {
 			
 			//normalization
@@ -133,7 +154,6 @@ public class OptionsControler implements Initializable{
 			
 			x = (x-x_min)/(x_max-x_min)*(width-1);
 			y = (y-y_min)/(y_max-y_min)*(height-1);
-			//System.out.printf("%d,%d\n",x,y);
 			gc.setFill(Color.WHITE);
 			gc.fillRect(x,y, 1,1);
 			
