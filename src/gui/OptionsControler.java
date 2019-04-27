@@ -3,12 +3,15 @@ package gui;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.lang.Math;
 
 import beans.Array;
+import beans.Linear;
 import beans.Shape;
 import beans.ShapeReader;
 import beans.Linear.Projections;
 import javafx.fxml.Initializable;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -54,19 +57,32 @@ public class OptionsControler implements Initializable{
 	TextField txtFieldU;
 	
 	@FXML
+	TextField txtFieldC;
+	
+	@FXML
 	TextField txtFieldHX;
 	
 	@FXML
 	TextField txtFieldHY;
 	
 	@FXML
-	TextField txtFieldC;
+	TextField txtFieldD;
 	
 	@FXML
 	Button btnCalculate;
 	
 	GraphicsContext gc;
-		
+	//Arrays
+	Array N  = new Array(1,3);
+	Array V  = new Array(1,3);
+	Array U  = new Array(1,3);
+	Array C  = new Array(1,3);
+	//scalars
+	double hx;
+	double hy;
+	double d;
+	//Current Shape
+	String currentShape = "calice2.byu";
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -75,14 +91,17 @@ public class OptionsControler implements Initializable{
 		gc = canvas.getGraphicsContext2D();			
 		this.width = canvas.getWidth();
 		this.height= canvas.getHeight();	
-		gc.setFill(Color.BLACK);
-		gc.fillRect(0, 0, width, height);
-		drawDefaultShape();
+		this.gc.setFill(Color.BLACK);
+		this.gc.fillRect(0, 0, width, height);
+		
+		this.initializeCameraParameters();
+		
+		this.drawDefaultShape();
 	}
 	
 	public void drawDefaultShape() {
 		Shape s = sr.read(objects[0]);
-		compute_coordinates_and_draw_pixels(s,gc);
+		compute_coordinates_and_draw_pixels_orthogonal(s,gc);
 	}
 	
 	private void initializeMenuButton() {
@@ -100,12 +119,49 @@ public class OptionsControler implements Initializable{
 		this.shapeSelector.show();
 	}
 	
+	private void initializeCameraParameters() { 
+		this.txtFieldN.setText("1 2 3");
+		this.txtFieldV.setText("3 2 1");
+		this.txtFieldU.setText("3 1 3");
+		this.txtFieldC.setText("3 3 7");
+		this.txtFieldHX.setText("12");
+		this.txtFieldHY.setText("12");
+		this.txtFieldD.setText("20");		
+		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
+		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
+		this.U  = this.createArrayFromTextFieldValues(this.txtFieldU,this.U);
+		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
+		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
+		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
+		this.d = this.readScalarsFromTextField(this.txtFieldD);		
+		Projections.computePerspectiveMatrix(this.N, this.U, this.V);		
+	}
+	
 	public void selectShapeCallback(String shapeSelected) {
 		gc.setFill(Color.BLACK);
 		gc.fillRect(0,0, this.width,this.height);
 		Shape s = sr.read(shapeSelected);
-		compute_coordinates_and_draw_pixels(s,gc);
+		compute_coordinates_and_draw_pixels_orthogonal(s,gc);
+		this.currentShape = shapeSelected;
 	}
+	
+	@FXML
+	public void calculateAndDraw(ActionEvent event) {
+		this.gc.setFill(Color.BLACK);
+		this.gc.fillRect(0,0,this.width,this.height);
+		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
+		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
+		this.U  = this.createArrayFromTextFieldValues(this.txtFieldU,this.U);
+		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
+		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
+		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
+		this.d = this.readScalarsFromTextField(this.txtFieldD);		
+		Projections.computePerspectiveMatrix(this.N, this.U, this.V);
+		ShapeReader sr = new ShapeReader();
+		Shape s = sr.read(this.currentShape);
+		compute_coordinates_and_draw_pixels_orthogonal(s,this.gc);
+	}
+	
 	
 	//Internal functions
 	public static double getDimentionMaxValue(Array vertexes[],int dim) {
@@ -114,8 +170,7 @@ public class OptionsControler implements Initializable{
 		for(int v = 0; v < vertexes.length;v++) {
 			if(vertexes[v].getItem(0,dim) > value)
 				value = vertexes[v].getItem(0,dim);
-		}
-		
+		}		
 		return value;		
 	}
 	
@@ -139,7 +194,7 @@ public class OptionsControler implements Initializable{
 	}
 	
 	@SuppressWarnings("exports")
-	public void compute_coordinates_and_draw_pixels(Shape s,GraphicsContext gc) {
+	public void compute_coordinates_and_draw_pixels_orthogonal(Shape s,GraphicsContext gc) {
 		Array shapeVertices [] = applyOrthogonalProjectionToVertexSet(s);
 		double x_max = getDimentionMaxValue(shapeVertices,0);
 		double x_min = getDimentionMinValue(shapeVertices,0);
@@ -155,10 +210,70 @@ public class OptionsControler implements Initializable{
 			x = (x-x_min)/(x_max-x_min)*(width-1);
 			y = (y-y_min)/(y_max-y_min)*(height-1);
 			gc.setFill(Color.WHITE);
-			gc.fillRect(x,y, 1,1);
-			
+			gc.fillRect(x,y, 1,1);			
+		}		
+	}
+	
+	public void compute_coordinates_and_draw_pixels_perspective(Shape s,GraphicsContext gc) {
+		Array verticesSet [] = s.getVertexes();
+		
+		for(int i = 0; i < verticesSet.length;i++) {
+			//projecting vertex
+			Array aux = verticesSet[i];
+			aux = Projections.applyPerspectiveTransformation(aux, this.C).t();
+			aux = Projections.projectPerspective(aux,this.d).t();
+			//normalizing
+			aux.setItem(aux.getItem(0, 0)/this.hx, 0, 0);
+			aux.setItem(aux.getItem(0, 1)/this.hy, 0, 1);
+			//Transforming the normalized coordinates in to screen cordinates
+			double k = Math.floor((aux.getItem(0, 0)+1)/2*this.width+0.5);
+			double l = Math.floor(this.height - (aux.getItem(0, 1)+1)/2*this.height+0.5);
+			gc.setFill(Color.WHITE);
+			gc.fillRect(k,l,1,1);
 		}
 		
+	}
+	
+	//Utils
+	public Array createArrayFromTextFieldValues(@SuppressWarnings("exports") TextField tField,Array A) {
+		String values = tField.getText() + " ";
+		String number ="";
+		int k = 0;
+		for(int i = 0; i < values.length();i++) {			
+			if(values.charAt(i)  != ' ') {
+				number += values.charAt(i);
+			}
+			else {
+				if(k < A.getDim())
+					A.setItem(Double.valueOf(number), 0, k++);
+				else
+					break;
+				number = "";
+			}				
+		}		
+		return A;
+	}
+	
+	public double readScalarsFromTextField(@SuppressWarnings("exports") TextField tField) {
+		double scalar = 0;
+		String values = tField.getText() + " ";
+		String number ="";
+		int k = 0;
+		for(int i = 0; i < values.length();i++) {			
+			if(values.charAt(i)  != ' ') {
+				number += values.charAt(i);
+			}
+			else {
+				if(k < 1) {
+					scalar = Double.valueOf(number);
+					k++;
+				}	
+				else
+					break;
+				number = "";
+			}				
+		}
+		return scalar;	
 	}
 	
 }

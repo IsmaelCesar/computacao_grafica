@@ -78,4 +78,12 @@ public class Questionary {
 		Array C = new Array(c);
 		System.out.println(Linear.getGeometricFromBarycentric(Barycentric, A, B, C));		
 	}
+	
+	public static void main(String []args) {
+		double n [][] = {{1,2,3}};
+		double v [][] = {{3,2,1}};
+		double u [][] = {{3,1,3}};
+		Projections.computePerspectiveMatrix(new Array(n), new Array(u),new Array(v));	
+		
+	}
 }

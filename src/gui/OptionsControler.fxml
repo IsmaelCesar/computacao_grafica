@@ -29,9 +29,9 @@
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="167.0" minWidth="10.0" prefWidth="163.0" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints maxHeight="126.0" minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="299.0" minHeight="10.0" prefHeight="294.0" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="76.0" minHeight="10.0" prefHeight="74.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="126.0" minHeight="0.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="348.0" minHeight="10.0" prefHeight="333.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="76.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <MenuButton id="shapeSelector" fx:id="shapeSelector" mnemonicParsing="false" prefHeight="26.0" prefWidth="174.0" text="Select Shape" GridPane.columnIndex="1" />
@@ -43,14 +43,16 @@
                   <Text layoutX="14.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="N:" />
                   <Text layoutX="14.0" layoutY="105.0" strokeType="OUTSIDE" strokeWidth="0.0" text="V:" />
                   <Text layoutX="14.0" layoutY="139.0" strokeType="OUTSIDE" strokeWidth="0.0" text="U:" />
-                  <TextField id="txtFieldHX" fx:id="txtFieldHX" layoutX="50.0" layoutY="156.0" prefHeight="26.0" prefWidth="99.0" />
-                  <Text layoutX="15.0" layoutY="169.0" strokeType="OUTSIDE" strokeWidth="0.0" text="hx:" />
-                  <TextField id="txtFieldHY" fx:id="txtFieldHY" layoutX="50.0" layoutY="189.0" prefHeight="26.0" prefWidth="99.0" />
-                  <Text layoutX="15.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" text="hy:" />
-                  <TextField id="txtFieldC" fx:id="txtFieldC" layoutX="50.0" layoutY="223.0" prefHeight="26.0" prefWidth="99.0" promptText="Cx Cy Cz" />
-                  <Text layoutX="15.0" layoutY="239.0" strokeType="OUTSIDE" strokeWidth="0.0" text="C:" />
-                  <Button id="btnCalculate" fx:id="btnCalculate" layoutX="51.0" layoutY="259.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="99.0" text="Calculate" />
+                  <TextField id="txtFieldHX" fx:id="txtFieldHX" layoutX="50.0" layoutY="193.0" prefHeight="26.0" prefWidth="99.0" />
+                  <Text layoutX="15.0" layoutY="206.0" strokeType="OUTSIDE" strokeWidth="0.0" text="hx:" />
+                  <TextField id="txtFieldHY" fx:id="txtFieldHY" layoutX="50.0" layoutY="226.0" prefHeight="26.0" prefWidth="99.0" />
+                  <Text layoutX="15.0" layoutY="242.0" strokeType="OUTSIDE" strokeWidth="0.0" text="hy:" />
+                  <TextField id="txtFieldC" fx:id="txtFieldC" layoutX="50.0" layoutY="156.0" prefHeight="26.0" prefWidth="99.0" promptText="Cx Cy Cz" />
+                  <Text layoutX="15.0" layoutY="172.0" strokeType="OUTSIDE" strokeWidth="0.0" text="C:" />
+                  <Button id="btnCalculate" fx:id="btnCalculate" layoutX="50.0" layoutY="298.0" mnemonicParsing="false" onAction="#calculateAndDraw" prefHeight="26.0" prefWidth="99.0" text="Calculate" />
                   <TextField id="txtFieldN" fx:id="txtFieldN" layoutX="50.0" layoutY="60.0" prefHeight="26.0" prefWidth="99.0" promptText="Nx Ny Nz" />
+                  <TextField id="txtFieldC" fx:id="txtFieldD" layoutX="50.0" layoutY="262.0" prefHeight="26.0" prefWidth="99.0" />
+                  <Text layoutX="22.0" layoutY="280.0" strokeType="OUTSIDE" strokeWidth="0.0" text="d:" />
                </children>
             </Pane>
          </children>
