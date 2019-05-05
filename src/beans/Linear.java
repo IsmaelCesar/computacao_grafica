@@ -195,10 +195,9 @@ public class Linear {
 		if(A.getRows_dim() == 1 && B.getRows_dim() == 1) {
 			if(A.getDim()==3 && B.getDim()==3) {
 				result = new Array(1,A.getDim());				
-				result.setItem(A.getItem(0, 1)*B.getItem(0, 2) - A.getItem(0, 2)*B.getItem(0, 1) , 0, 0);
-				result.setItem(A.getItem(0, 0)*B.getItem(0, 2) - A.getItem(0, 2)*B.getItem(0, 0) , 0, 1);
-				result.setItem(A.getItem(0, 0)*B.getItem(0, 1) - A.getItem(0, 1)*B.getItem(0, 0) , 0, 2);
-				
+				result.setItem(-(A.getItem(0, 1)*B.getItem(0, 2) - A.getItem(0, 2)*B.getItem(0, 1)),0, 0);
+				result.setItem(-(A.getItem(0, 0)*B.getItem(0, 2) - A.getItem(0, 2)*B.getItem(0, 0)),0, 1);
+				result.setItem(-(A.getItem(0, 0)*B.getItem(0, 1) - A.getItem(0, 1)*B.getItem(0, 0)),0, 2);				
 			}
 			else
 				throw new IllegalArgumentException("The input arrays dimention do not match.");
@@ -208,8 +207,25 @@ public class Linear {
 		return result;
 	}
 	
+	public static Array[] gramSchmidt(Array N,Array V) {		
+		Array result [] = new Array[3];
+				
+		Array vProjOnToN = Linear.dotScalar(Linear.dot(V,N.t()).getItem(0, 0)/Linear.dot(N, N.t()).getItem(0,0), N);
+		Array vO = Linear.subtraction(V, vProjOnToN);	
+				
+		Array U = Linear.cross(N, vO);
+
+		result[0] = U;
+		result[1] = vO;
+		result[2] = N;
+		
+		return result;
+	}
+	
 	//Implementations of projections
 	public static class Projections{
+		
+		public static Array perspectiveMatrix = new Array(3,3);
 		
 		public static Array orthogonal(Array A) {
 			A = transpose_for_procedure(A);
@@ -222,6 +238,53 @@ public class Linear {
 			}
 			else
 				throw new IllegalArgumentException("The input array must be 1xn");
+			return result;
+		}
+		
+		
+		//Perspective related transforms and projections
+		public static void computePerspectiveMatrix(Array n, Array v) {			
+			Array orthogonalized [] = Linear.gramSchmidt(n,v);			
+			orthogonalized[0] = orthogonalized[0].normalization();//Norm U
+		    orthogonalized[1] = orthogonalized[1].normalization();//Norm VO
+			orthogonalized[2] = orthogonalized[2].normalization();//Norm N			
+			for(int i = 0; i < 3; i++) {
+				for(int j = 0; j < 3; j++) {
+					perspectiveMatrix.setItem(orthogonalized[i].getItem(0, j), i, j);
+				}
+			}
+		}
+		
+		public static Array applyPerspectiveTransformation(Array P,Array C) {
+			Array result = null;
+			Array newP = new Array(P.getValues());
+			Array newC = new Array(C.getValues());
+			if(P.getRows_dim() == 1) {
+				newP = P.t(); 
+			}
+			if(C.getRows_dim() == 1) {
+				newC = C.t(); 
+			} 
+			result = Linear.dot(perspectiveMatrix, Linear.subtraction(newP, newC));
+			return result;
+		}
+		
+		public static Array projectPerspective(Array P, double d,double hx,double hy) {
+			double def[][]= {{1,0,0},
+						     {0,1,0}};
+			Array defProj = new Array(def);
+			
+			Array result = new Array(1,3);
+			
+			Array p = new Array(P.getValues());			
+			if(p.getRows_dim() == 1) {
+				result.setItem((d*p.getItem(0, 0))/(p.getItem(0, 2)*hx), 0, 0);
+				result.setItem((d*p.getItem(0, 1))/(p.getItem(0, 2)*hy), 0, 1);
+				result = Linear.dot(defProj, result.t());
+			}
+			else
+				throw new IllegalArgumentException("The array is not a tridimentional one");
+			
 			return result;
 		}
 		

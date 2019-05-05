@@ -39,7 +39,13 @@ public class Array {
 	}
 
 	public double[][] getValues() {
-		return values;
+		double copy[][] = new double[this.rows_dim][this.dim];
+		for(int i = 0 ; i< this.rows_dim;i++) {
+			for(int j =0; j < this.dim; j++) {
+				 copy[i][j] = this.values[i][j];
+			}
+		}
+		return copy;
 	}
 	
 	public Array normalization() {
@@ -64,22 +70,19 @@ public class Array {
 				 transposed_array[j][i]= this.values[i][j];
 			}			
 		}
-		this.values = transposed_array;
-		int aux = this.dim;
-		this.dim = this.rows_dim;
-		this.rows_dim= aux;
-		return this;
+		//this.values = transposed_array;
+		//int aux = this.dim;
+		//this.dim = this.rows_dim;
+		//this.rows_dim= aux;
+		return new Array(transposed_array);
 	}
 	
 	public double norm() {
 		//Returns the norm of a vector
 		double r = 0;
 		if(this.rows_dim == 1) {
-			double sum =0;
-			for(int i =0; i< this.dim;i++) {
-				sum += this.values[0][i]*this.values[0][i];
-			}
-			r = Math.sqrt(sum);
+			double dotResult = Linear.dot(this, this.t()).getItem(0, 0);
+			r = Math.sqrt(dotResult);
 		}
 		return r;
 	}
