@@ -80,10 +80,22 @@ public class Questionary {
 	}
 	
 	public static void main(String []args) {
-		double n [][] = {{1,2,3}};
-		double v [][] = {{3,2,1}};
-		double u [][] = {{3,1,3}};
-		Projections.computePerspectiveMatrix(new Array(n), new Array(u),new Array(v));	
+		double c [][]= {{1,1,2}};
+		Array C = new Array(c);
+		double n [][]= {{-1,-1,-1}};
+		Array N = new Array(n);
+		double v [][]= {{0,0,1}};
+		Array V = new Array(v);
 		
+		double d = 1,hx = 1, hy = 1;
+		
+		Projections.computePerspectiveMatrix(N, V);
+		 
+		double p [][] = {{1,-3,-5}};
+		Array P = new Array(p);
+		
+		Array sight = Projections.applyPerspectiveTransformation(P, C);
+		Array screen = Projections.projectPerspective(P, d,hx,hy);		
+		System.out.println(sight);
 	}
 }

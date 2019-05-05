@@ -54,9 +54,6 @@ public class OptionsControler implements Initializable{
 	TextField txtFieldV;
 	
 	@FXML
-	TextField txtFieldU;
-	
-	@FXML
 	TextField txtFieldC;
 	
 	@FXML
@@ -75,7 +72,6 @@ public class OptionsControler implements Initializable{
 	//Arrays
 	Array N  = new Array(1,3);
 	Array V  = new Array(1,3);
-	Array U  = new Array(1,3);
 	Array C  = new Array(1,3);
 	//scalars
 	double hx;
@@ -101,7 +97,7 @@ public class OptionsControler implements Initializable{
 	
 	public void drawDefaultShape() {
 		Shape s = sr.read(objects[0]);
-		compute_coordinates_and_draw_pixels_orthogonal(s,gc);
+		compute_coordinates_and_draw_pixels_perspective(s,gc);
 	}
 	
 	private void initializeMenuButton() {
@@ -120,28 +116,26 @@ public class OptionsControler implements Initializable{
 	}
 	
 	private void initializeCameraParameters() { 
-		this.txtFieldN.setText("1 2 3");
-		this.txtFieldV.setText("3 2 1");
-		this.txtFieldU.setText("3 1 3");
-		this.txtFieldC.setText("3 3 7");
-		this.txtFieldHX.setText("12");
-		this.txtFieldHY.setText("12");
-		this.txtFieldD.setText("20");		
+		this.txtFieldN.setText("0 1.4 -1");
+		this.txtFieldV.setText("0 -1 -1");
+		this.txtFieldC.setText("0 -500 500");
+		this.txtFieldHX.setText("1.5");
+		this.txtFieldHY.setText("1.5");
+		this.txtFieldD.setText("7");		
 		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
 		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
-		this.U  = this.createArrayFromTextFieldValues(this.txtFieldU,this.U);
 		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
 		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
-		Projections.computePerspectiveMatrix(this.N, this.U, this.V);		
+		Projections.computePerspectiveMatrix(this.N, this.V);		
 	}
 	
 	public void selectShapeCallback(String shapeSelected) {
 		gc.setFill(Color.BLACK);
 		gc.fillRect(0,0, this.width,this.height);
 		Shape s = sr.read(shapeSelected);
-		compute_coordinates_and_draw_pixels_orthogonal(s,gc);
+		compute_coordinates_and_draw_pixels_perspective(s,gc);
 		this.currentShape = shapeSelected;
 	}
 	
@@ -151,15 +145,14 @@ public class OptionsControler implements Initializable{
 		this.gc.fillRect(0,0,this.width,this.height);
 		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
 		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
-		this.U  = this.createArrayFromTextFieldValues(this.txtFieldU,this.U);
 		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
 		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
-		Projections.computePerspectiveMatrix(this.N, this.U, this.V);
+		Projections.computePerspectiveMatrix(this.N, this.V);
 		ShapeReader sr = new ShapeReader();
 		Shape s = sr.read(this.currentShape);
-		compute_coordinates_and_draw_pixels_orthogonal(s,this.gc);
+		compute_coordinates_and_draw_pixels_perspective(s,this.gc);
 	}
 	
 	
@@ -216,23 +209,76 @@ public class OptionsControler implements Initializable{
 	
 	public void compute_coordinates_and_draw_pixels_perspective(Shape s,GraphicsContext gc) {
 		Array verticesSet [] = s.getVertexes();
-		
 		for(int i = 0; i < verticesSet.length;i++) {
 			//projecting vertex
 			Array aux = verticesSet[i];
 			aux = Projections.applyPerspectiveTransformation(aux, this.C).t();
-			aux = Projections.projectPerspective(aux,this.d).t();
-			//normalizing
-			aux.setItem(aux.getItem(0, 0)/this.hx, 0, 0);
-			aux.setItem(aux.getItem(0, 1)/this.hy, 0, 1);
-			//Transforming the normalized coordinates in to screen cordinates
-			double k = Math.floor((aux.getItem(0, 0)+1)/2*this.width+0.5);
-			double l = Math.floor(this.height - (aux.getItem(0, 1)+1)/2*this.height+0.5);
+			aux = Projections.projectPerspective(aux,this.d,this.hx,this.hy).t();
+			double k = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
+			double l = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
 			gc.setFill(Color.WHITE);
 			gc.fillRect(k,l,1,1);
+		}		
+	}
+	
+	//Rasterize
+	public void iterateOverTriangles(Shape s, GraphicsContext gc) {
+		int triangles [][] = s.getTriangles();		
+		for(int i = 0; i<triangles.length;i++) {
+			rasterizeTriangle(triangles[i],s,gc);
+		}		
+	}
+	
+	public void rasterizeTriangle(int triangleIndices[], Shape s, GraphicsContext gc) {
+		
+		//Get all vertices
+		Array vertices [] = new Array [3];
+		for(int i = 0;i < triangleIndices.length;i++) {
+			vertices[i] = s.getVertex(triangleIndices[i]); 
 		}
 		
+		//Projecting vertices and getting screen coordinates
+		Array aux = null;
+		double screenCoordinates [][] = new double [3][2];
+		for(int i =0;i < triangleIndices.length; i++) {
+			aux = Projections.applyPerspectiveTransformation(vertices[i], this.C).t();
+			aux = Projections.projectPerspective(aux, this.d, this.hx, this.hx).t();
+			screenCoordinates[i][0] = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
+			screenCoordinates[i][1] = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
+			
+		}
+		// RASTERIZE TRIANGLES
+		//sort triangles by height
+		for(int i =0;i < triangleIndices.length; i++) {
+			int j = 1;
+			while(j > i && screenCoordinates[j][1] < screenCoordinates[j-1][1]) {				
+				double c [] =  screenCoordinates[j-1];
+				screenCoordinates[j-1] = screenCoordinates[j];
+				screenCoordinates[j--]   = c;
+			}
+		}
+		
+		double a1 = ((screenCoordinates[1][1] - screenCoordinates[0][1])/
+				    (screenCoordinates[1][0] - screenCoordinates[0][0]));
+		
+		double a2 = ((screenCoordinates[2][1] - screenCoordinates[0][1])/
+					 (screenCoordinates[2][0] - screenCoordinates[0][0]));
+		
+		double xmin,xmax;
+		xmin  = xmax = screenCoordinates[0][0];
+		
+		
+		for(int yscan=(int)screenCoordinates[0][1];yscan<=(int)screenCoordinates[1][1];yscan++) {
+			
+			for(int iXmin = (int)xmin; iXmin <= (int) xmax;iXmin++) {
+				gc.fillRect(iXmin, yscan, 1, 1);
+				
+			}
+		}
+		
+		
 	}
+	
 	
 	//Utils
 	public Array createArrayFromTextFieldValues(@SuppressWarnings("exports") TextField tField,Array A) {
