@@ -18,7 +18,7 @@ import javafx.scene.Scene;
 public class Screen extends Application{
 	
 	String absolutePath = "/home/ismael/Documentos/Github/computacao_grafica/src/gui/";
-	
+	//String absolutePath = "../../";
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// TODO Auto-generated method stub

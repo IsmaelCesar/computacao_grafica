@@ -210,7 +210,7 @@ public class OptionsControler implements Initializable{
 		}		
 	}
 	
-	public void compute_coordinates_and_draw_pixels_perspective(Shape s,GraphicsContext gc) {
+	public void compute_coordinates_and_draw_pixels_perspective(Shape s,@SuppressWarnings("exports") GraphicsContext gc) {
 		Array verticesSet [] = s.getVertexes();
 		for(int i = 0; i < verticesSet.length;i++) {
 			//projecting vertex
@@ -225,81 +225,78 @@ public class OptionsControler implements Initializable{
 	}
 	
 	//Rasterize
-	public void iterateOverTriangles(Shape s, GraphicsContext gc) {
-		for(int i = 0; i<s.getN_triangles() ;i++) {
-			rasterizeTriangle(s.getTriangleIndexes(i),s,gc);
+	public void iterateOverTriangles(Shape s, @SuppressWarnings("exports") GraphicsContext gc) {
+		gc.setFill(Color.WHITE);
+		int numTriangles= s.getTriangles().length;
+		for(int i = 0; i<numTriangles ;i++) {
+	        int triangleIndices []= s.getTriangleIndexes(i);
+			//Get all vertices
+			Array vertices [] = new Array [3];
+			for(int k = 0;k < vertices.length;k++) {
+				vertices[k] = s.getVertex(triangleIndices[k]-1); 
+			}
+			rasterizeTriangle(vertices,gc);			
 		}		
 	}
 	
-	public void rasterizeTriangle(int triangleIndices[], Shape s, GraphicsContext gc) {
-		gc.setFill(Color.WHITE);
-		//Get all vertices
-		Array vertices [] = new Array [3];
-		for(int i = 0;i < vertices.length;i++) {
-			vertices[i] = s.getVertex(triangleIndices[i]-1); 
-		}
-		
+	public void rasterizeTriangle(Array triangle[],@SuppressWarnings("exports") GraphicsContext gc) {
 		//Projecting vertices and getting screen coordinates
 		Array aux = null;
 		double screenCoordinates [][] = new double [3][2];
-		for(int i =0;i < triangleIndices.length; i++) {
-			aux = Projections.applyPerspectiveTransformation(vertices[i], this.C).t();
+		for(int k =0;k < triangle.length; k++) {
+			aux = Projections.applyPerspectiveTransformation(triangle[k], this.C).t();
 			aux = Projections.projectPerspective(aux, this.d, this.hx, this.hx).t();
-			screenCoordinates[i][0] = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
-			screenCoordinates[i][1] = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
+			screenCoordinates[k][0] = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
+			screenCoordinates[k][1] = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
 			
 		}
 		// RASTERIZE TRIANGLES
 		//sort triangles by height
-		for(int i =1;i < triangleIndices.length; i++) {
-			int j = i-1;
-			double el[] = screenCoordinates[i];
+		for(int k =1;k < screenCoordinates.length; k++) {
+			int j = k-1;
+			double el[] = screenCoordinates[k];
 			while(j >=0  && el[1] < screenCoordinates[j][1]) {				
 				screenCoordinates[j+1] = screenCoordinates[j];
 				j--;
 			}
 			screenCoordinates[j+1] = el;
 		}
-		
+		double epsilon = 0.000000001;
 		double a1 = ((screenCoordinates[1][1] - screenCoordinates[0][1])/
-				    (screenCoordinates[1][0] - screenCoordinates[0][0]));
+				    (screenCoordinates[1][0] - screenCoordinates[0][0]+epsilon));
 				
-		double v4 [] = {(screenCoordinates[0][0]+(screenCoordinates[1][1] - screenCoordinates[0][1])/
-			    (screenCoordinates[1][0] - screenCoordinates[0][0])*
-			    (screenCoordinates[2][0] - screenCoordinates[0][0])),screenCoordinates[2][1]};
 
-		double a2 = ((v4[1] - screenCoordinates[0][1])/
-					 (v4[0] - screenCoordinates[0][0]));
+		double a2 = ((screenCoordinates[2][1] - screenCoordinates[0][1])/
+			    	(screenCoordinates[2][0] - screenCoordinates[0][0]+epsilon));
 		
 		//rasterizing first half of the triangle
 		double  xmin  = screenCoordinates[0][0];
 		double  xmax  = screenCoordinates[0][0];
 		for(int yscan=(int)screenCoordinates[0][1]; yscan<= screenCoordinates[1][1];yscan++) {			
-			for(int i = (int)xmin; i <= xmax; i++ ) {
-				gc.fillRect(i, yscan, 1, 1);
+			for(int j = (int)xmin; j <= (int)xmax; j++ ) {
+				gc.fillRect(j, yscan, 1, 1);
 			}			
 			xmin += 1/a1;
 			xmax += 1/a2;
 		}
 		
-		
-		a1 = ((screenCoordinates[2][1] - screenCoordinates[1][1])/
-		      (screenCoordinates[2][0] - screenCoordinates[1][0]));
-		a2 = ((screenCoordinates[2][1]-v4[1])/
-				 (screenCoordinates[2][0]-v4[0]));
 		//rasterizing second half of the triangle
-		xmin = screenCoordinates[2][0];
-		xmax = screenCoordinates[2][1];
-		for(int yscan=(int)screenCoordinates[2][1]; yscan<= screenCoordinates[1][1];yscan--) {			
-			for(int i = (int)xmin; i <= xmax; i++ ) {
-				gc.fillRect(i, yscan, 1, 1);
-			}			
-			xmin += 1/a1;
-			xmax += 1/a2;
-		}
-		
-	}
+		a1 = ((screenCoordinates[2][1] - screenCoordinates[1][1])/
+			  (screenCoordinates[2][0] - screenCoordinates[1][0]+epsilon));
 	
+		a2 = ((screenCoordinates[2][1] - screenCoordinates[0][1])/
+		    		(screenCoordinates[2][0] - screenCoordinates[0][0]+epsilon));
+		
+		xmin = screenCoordinates[2][0];
+		xmax = screenCoordinates[2][0];
+		for(int yscan=(int)screenCoordinates[2][1]; yscan>= (int)screenCoordinates[1][1];yscan--) {			
+			for(int j = (int)xmin; j <= (int)xmax; j++ ) {
+				gc.fillRect(j, yscan, 1, 1);
+			}			
+			xmin -= 1/a1;
+			xmax -= 1/a2;
+		}
+	}
 	
 	//Utils
 	public Array createArrayFromTextFieldValues(@SuppressWarnings("exports") TextField tField,Array A) {
