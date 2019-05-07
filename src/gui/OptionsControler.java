@@ -36,8 +36,8 @@ public class OptionsControler implements Initializable{
 	double height;
 	
 	ShapeReader sr = new ShapeReader();
-	String selectedShape= objects[0];
-	String tempSelected = objects[0];
+	String selectedShape= objects[5];
+	String tempSelected = objects[5];
 	
 	//Variables from FXML
 	@FXML
@@ -96,7 +96,7 @@ public class OptionsControler implements Initializable{
 	}
 	
 	public void drawDefaultShape() {
-		Shape s = sr.read(objects[0]);
+		Shape s = sr.read(objects[5]);
 		//compute_coordinates_and_draw_pixels_perspective(s,gc);
 		iterateOverTriangles(s,gc);
 	}
@@ -261,36 +261,53 @@ public class OptionsControler implements Initializable{
 			}
 			screenCoordinates[j+1] = el;
 		}
-		double epsilon = 0.000000001;
-		double a1 = ((screenCoordinates[1][1] - screenCoordinates[0][1])/
-				    (screenCoordinates[1][0] - screenCoordinates[0][0]+epsilon));
-				
-
-		double a2 = ((screenCoordinates[2][1] - screenCoordinates[0][1])/
-			    	(screenCoordinates[2][0] - screenCoordinates[0][0]+epsilon));
+		
+		//calculate division point
+		double deltaMiddle = screenCoordinates[1][1] - screenCoordinates[0][1];
+		double deltaBottom = screenCoordinates[2][1] - screenCoordinates[0][1];
+		double deltaXBottom = screenCoordinates[2][0] - screenCoordinates[0][0];
+		double xTop = screenCoordinates[0][0];
+		double division [] = {xTop + (deltaMiddle/deltaBottom)*deltaXBottom,screenCoordinates[1][1]};
+		
+		if(screenCoordinates[1][0] > division[0]) {
+			double swap[] = screenCoordinates[1];
+			screenCoordinates[1] = division;
+			division = swap;
+		}
 		
 		//rasterizing first half of the triangle
+		double a1 = ((screenCoordinates[1][1] - screenCoordinates[0][1])/
+				    (screenCoordinates[1][0] - screenCoordinates[0][0]));			
+
+		double a2 = ((division[1] - screenCoordinates[0][1])/
+			    	 (division[0] - screenCoordinates[0][0]));	
+		
 		double  xmin  = screenCoordinates[0][0];
 		double  xmax  = screenCoordinates[0][0];
+		
 		for(int yscan=(int)screenCoordinates[0][1]; yscan<= screenCoordinates[1][1];yscan++) {			
-			for(int j = (int)xmin; j <= (int)xmax; j++ ) {
+			int min = (int)Math.floor(xmin+0.5);
+			int max = (int)Math.floor(xmax+0.5);
+			for(int j = min; j <= max; j++ ) {
 				gc.fillRect(j, yscan, 1, 1);
-			}			
+			}
 			xmin += 1/a1;
 			xmax += 1/a2;
 		}
 		
 		//rasterizing second half of the triangle
 		a1 = ((screenCoordinates[2][1] - screenCoordinates[1][1])/
-			  (screenCoordinates[2][0] - screenCoordinates[1][0]+epsilon));
+			  (screenCoordinates[2][0] - screenCoordinates[1][0]));
 	
-		a2 = ((screenCoordinates[2][1] - screenCoordinates[0][1])/
-		    		(screenCoordinates[2][0] - screenCoordinates[0][0]+epsilon));
+		a2 = ((screenCoordinates[2][1] - division[1])/
+		      (screenCoordinates[2][0] - division[0]));
 		
 		xmin = screenCoordinates[2][0];
 		xmax = screenCoordinates[2][0];
 		for(int yscan=(int)screenCoordinates[2][1]; yscan>= (int)screenCoordinates[1][1];yscan--) {			
-			for(int j = (int)xmin; j <= (int)xmax; j++ ) {
+			int min = (int)Math.floor(xmin+0.5);
+			int max = (int)Math.floor(xmax+0.5);
+			for(int j = min; j <= max; j++ ) {
 				gc.fillRect(j, yscan, 1, 1);
 			}			
 			xmin -= 1/a1;
@@ -299,6 +316,7 @@ public class OptionsControler implements Initializable{
 	}
 	
 	//Utils
+	
 	public Array createArrayFromTextFieldValues(@SuppressWarnings("exports") TextField tField,Array A) {
 		String values = tField.getText() + " ";
 		String number ="";
