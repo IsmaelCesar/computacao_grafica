@@ -133,6 +133,7 @@ public class OptionsControler implements Initializable{
 	public void selectShapeCallback(String shapeSelected) {
 		gc.setFill(Color.BLACK);
 		gc.fillRect(0,0, this.width,this.height);
+		zbuffer = new Array((int)width,(int)height);
 		Shape s = sr.read(shapeSelected);
 		iterateOverTriangles(s,gc);
 		this.currentShape = shapeSelected;
@@ -149,6 +150,7 @@ public class OptionsControler implements Initializable{
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
 		Projections.computePerspectiveMatrix(this.N, this.V);
+		zbuffer = new Array((int)width,(int)height);
 		ShapeReader sr = new ShapeReader();
 		Shape s = sr.read(this.currentShape);
 		iterateOverTriangles(s,gc);
@@ -290,7 +292,7 @@ public class OptionsControler implements Initializable{
 			int max = (int)Math.floor(xmax+0.5);
 			for(int j = min; j <= max; j++ ) {
 				
-				//Creating array objects from points							
+				//Creating array objects from points
 				double a[][] = {{screenCoordinates[0][0],screenCoordinates[0][1]}};
 				double b[][] = {{Math.floor(xmin+0.5),(double)yscan}};
 				double c[][] = {{Math.floor(xmax+0.5),(double)yscan}};
@@ -328,7 +330,26 @@ public class OptionsControler implements Initializable{
 			int min = (int)Math.floor(xmin+0.5);
 			int max = (int)Math.floor(xmax+0.5);
 			for(int j = min; j <= max; j++ ) {
-				gc.fillRect(j, yscan, 1, 1);
+				//Creating array objects from points
+				double a[][] = {{screenCoordinates[2][0],screenCoordinates[2][1]}};
+				double b[][] = {{Math.floor(xmin+0.5),(double)yscan}};
+				double c[][] = {{Math.floor(xmax+0.5),(double)yscan}};
+				double p[][] = {{(double)j,(double)yscan}};
+				Array A = new Array(a);
+				Array B = new Array(b);
+				Array C = new Array(c);
+				Array P = new Array(p);
+				
+				if(j> min && j < max) {
+					this.zbuffering(P,A,B,C,j,yscan);
+				}
+				else if(j== min) {					
+					this.zbuffering(B,A,B,C,j,yscan);
+				}
+				else if(j==max) {
+					this.zbuffering(C,A,B,C,j,yscan);
+				}
+				//gc.fillRect(j, yscan, 1, 1);
 			}			
 			xmin -= 1/(a1+epsilon);
 			xmax -= 1/(a2+epsilon);
@@ -339,13 +360,15 @@ public class OptionsControler implements Initializable{
 	public void zbuffering(Array P,Array A, Array B, Array C,int i,int j) {
 		//The i and j represent the screen coordinates
 		//It recieves 3 arrays in order to calculat the baricentric coordinates
-		Array baricords = Linear.getBarycentricCoordinates(P, A, B, C);		
-		double value = this.zbuffer.getItem(i,j); 
-		if(value < baricords.getItem(0,2)) {
-			//draw point and save the new value
-			this.zbuffer.setItem(baricords.getItem(0,2),i,j);
-			this.gc.fillRect(i,j,1,1);
-		}		
+		Array baricords = Linear.getBarycentricCoordinates(P, A, B, C);
+		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {
+			double value = this.zbuffer.getItem(i,j); 
+			if(value < baricords.getItem(0,2)) {
+				//draw point and save the new value
+				this.zbuffer.setItem(baricords.getItem(0,2),i,j);
+				this.gc.fillRect(i,j,1,1);
+			}
+		}
 	}
 	
 	//Utils	
