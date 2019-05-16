@@ -38,7 +38,7 @@ public class OptionsControler implements Initializable{
 	ShapeReader sr = new ShapeReader();
 	String selectedShape= objects[5];
 	String tempSelected = objects[5];
-	
+	Array zbuffer;
 	//Variables from FXML
 	@FXML
 	MenuButton shapeSelector;
@@ -87,17 +87,31 @@ public class OptionsControler implements Initializable{
 		gc = canvas.getGraphicsContext2D();			
 		this.width = canvas.getWidth();
 		this.height= canvas.getHeight();	
+		zbuffer = new Array((int)width,(int)height);
 		this.gc.setFill(Color.BLACK);
 		this.gc.fillRect(0, 0, width, height);
-		
-		this.initializeCameraParameters();
-		
+		this.initializeCameraParameters();		
 		this.drawDefaultShape();
+	}
+	
+	private void initializeCameraParameters() { 
+		this.txtFieldN.setText("0 1.4 -1");
+		this.txtFieldV.setText("0 -1 -1");
+		this.txtFieldC.setText("0 -500 500");
+		this.txtFieldHX.setText("1.5");
+		this.txtFieldHY.setText("1.5");
+		this.txtFieldD.setText("7");		
+		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
+		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
+		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
+		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
+		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
+		this.d = this.readScalarsFromTextField(this.txtFieldD);		
+		Projections.computePerspectiveMatrix(this.N, this.V);	
 	}
 	
 	public void drawDefaultShape() {
 		Shape s = sr.read(objects[5]);
-		//compute_coordinates_and_draw_pixels_perspective(s,gc);
 		iterateOverTriangles(s,gc);
 	}
 	
@@ -116,27 +130,10 @@ public class OptionsControler implements Initializable{
 		this.shapeSelector.show();
 	}
 	
-	private void initializeCameraParameters() { 
-		this.txtFieldN.setText("0 1.4 -1");
-		this.txtFieldV.setText("0 -1 -1");
-		this.txtFieldC.setText("0 -500 500");
-		this.txtFieldHX.setText("1.5");
-		this.txtFieldHY.setText("1.5");
-		this.txtFieldD.setText("7");		
-		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
-		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
-		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
-		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
-		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
-		this.d = this.readScalarsFromTextField(this.txtFieldD);		
-		Projections.computePerspectiveMatrix(this.N, this.V);		
-	}
-	
 	public void selectShapeCallback(String shapeSelected) {
 		gc.setFill(Color.BLACK);
 		gc.fillRect(0,0, this.width,this.height);
 		Shape s = sr.read(shapeSelected);
-		//compute_coordinates_and_draw_pixels_perspective(s,gc);
 		iterateOverTriangles(s,gc);
 		this.currentShape = shapeSelected;
 	}
@@ -154,7 +151,6 @@ public class OptionsControler implements Initializable{
 		Projections.computePerspectiveMatrix(this.N, this.V);
 		ShapeReader sr = new ShapeReader();
 		Shape s = sr.read(this.currentShape);
-		//compute_coordinates_and_draw_pixels_perspective(s,this.gc);
 		iterateOverTriangles(s,gc);
 	}
 	
@@ -242,10 +238,13 @@ public class OptionsControler implements Initializable{
 	public void rasterizeTriangle(Array triangle[],@SuppressWarnings("exports") GraphicsContext gc) {
 		//Projecting vertices and getting screen coordinates
 		Array aux = null;
+		double sightCoordinates [][] = new double [3][2];
 		double screenCoordinates [][] = new double [3][2];
 		for(int k =0;k < triangle.length; k++) {
 			aux = Projections.applyPerspectiveTransformation(triangle[k], this.C).t();
 			aux = Projections.projectPerspective(aux, this.d, this.hx, this.hx).t();
+			sightCoordinates[k][0] = aux.getItem(0, 0);
+			sightCoordinates[k][1] = aux.getItem(0, 1);
 			screenCoordinates[k][0] = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
 			screenCoordinates[k][1] = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
 			
@@ -276,11 +275,12 @@ public class OptionsControler implements Initializable{
 		}
 		
 		//rasterizing first half of the triangle
+		double epsilon = 0.000000000001;
 		double a1 = ((screenCoordinates[1][1] - screenCoordinates[0][1])/
-				    (screenCoordinates[1][0] - screenCoordinates[0][0]));			
+				    (screenCoordinates[1][0] - screenCoordinates[0][0]+epsilon));			
 
 		double a2 = ((division[1] - screenCoordinates[0][1])/
-			    	 (division[0] - screenCoordinates[0][0]));	
+			    	 (division[0] - screenCoordinates[0][0]+epsilon));	
 		
 		double  xmin  = screenCoordinates[0][0];
 		double  xmax  = screenCoordinates[0][0];
@@ -289,18 +289,38 @@ public class OptionsControler implements Initializable{
 			int min = (int)Math.floor(xmin+0.5);
 			int max = (int)Math.floor(xmax+0.5);
 			for(int j = min; j <= max; j++ ) {
-				gc.fillRect(j, yscan, 1, 1);
+				
+				//Creating array objects from points							
+				double a[][] = {{screenCoordinates[0][0],screenCoordinates[0][1]}};
+				double b[][] = {{Math.floor(xmin+0.5),(double)yscan}};
+				double c[][] = {{Math.floor(xmax+0.5),(double)yscan}};
+				double p[][] = {{(double)j,(double)yscan}};
+				Array A = new Array(a);
+				Array B = new Array(b);
+				Array C = new Array(c);
+				Array P = new Array(p);
+				
+				if(j> min && j < max) {
+					this.zbuffering(P,A,B,C,j,yscan);
+				}
+				else if(j== min) {					
+					this.zbuffering(B,A,B,C,j,yscan);
+				}
+				else if(j==max) {
+					this.zbuffering(C,A,B,C,j,yscan);
+				}
+				//gc.fillRect(j, yscan, 1, 1);
 			}
-			xmin += 1/a1;
-			xmax += 1/a2;
+			xmin += 1/(a1+epsilon);
+			xmax += 1/(a2+epsilon);
 		}
 		
 		//rasterizing second half of the triangle
 		a1 = ((screenCoordinates[2][1] - screenCoordinates[1][1])/
-			  (screenCoordinates[2][0] - screenCoordinates[1][0]));
+			  (screenCoordinates[2][0] - screenCoordinates[1][0]+epsilon));
 	
 		a2 = ((screenCoordinates[2][1] - division[1])/
-		      (screenCoordinates[2][0] - division[0]));
+		      (screenCoordinates[2][0] - division[0]+epsilon));
 		
 		xmin = screenCoordinates[2][0];
 		xmax = screenCoordinates[2][0];
@@ -310,13 +330,25 @@ public class OptionsControler implements Initializable{
 			for(int j = min; j <= max; j++ ) {
 				gc.fillRect(j, yscan, 1, 1);
 			}			
-			xmin -= 1/a1;
-			xmax -= 1/a2;
+			xmin -= 1/(a1+epsilon);
+			xmax -= 1/(a2+epsilon);
 		}
 	}
 	
-	//Utils
 	
+	public void zbuffering(Array P,Array A, Array B, Array C,int i,int j) {
+		//The i and j represent the screen coordinates
+		//It recieves 3 arrays in order to calculat the baricentric coordinates
+		Array baricords = Linear.getBarycentricCoordinates(P, A, B, C);		
+		double value = this.zbuffer.getItem(i,j); 
+		if(value < baricords.getItem(0,2)) {
+			//draw point and save the new value
+			this.zbuffer.setItem(baricords.getItem(0,2),i,j);
+			this.gc.fillRect(i,j,1,1);
+		}		
+	}
+	
+	//Utils	
 	public Array createArrayFromTextFieldValues(@SuppressWarnings("exports") TextField tField,Array A) {
 		String values = tField.getText() + " ";
 		String number ="";
