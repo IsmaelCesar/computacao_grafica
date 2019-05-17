@@ -1,8 +1,8 @@
 package gui;
 import beans.Array;
 import beans.Linear;
-import beans.Linear.Projections;
-import beans.ShapeReader;
+//import beans.Linear.Projections;
+
 
 public class Questionary {
 	
@@ -14,7 +14,7 @@ public class Questionary {
 				       {11.5,12.5}};
 		Array A = new Array(a);
 		Array B = new Array(b);
-		System.out.println(Linear.dot(A, A));
+		System.out.println(Linear.dot(A, B));
 	}
 	
 	public static void questao1_letraB() {
@@ -22,7 +22,7 @@ public class Questionary {
 		double b[][] ={{1.0,2.0,1.5}};
 		Array A = new Array(a);
 		Array B = new Array(b);
-		System.out.println(Linear.subtraction(A, A));
+		System.out.println(Linear.subtraction(A, B));
 	}
 	
 	public static void questao1_letraC() {
@@ -79,23 +79,23 @@ public class Questionary {
 		System.out.println(Linear.getGeometricFromBarycentric(Barycentric, A, B, C));		
 	}
 	
-	public static void main(String []args) {
-		double c [][]= {{1,1,2}};
-		Array C = new Array(c);
-		double n [][]= {{-1,-1,-1}};
-		Array N = new Array(n);
-		double v [][]= {{0,0,1}};
-		Array V = new Array(v);
-		
-		double d = 1,hx = 1, hy = 1;
-		
-		Projections.computePerspectiveMatrix(N, V);
-		 
-		double p [][] = {{1,-3,-5}};
-		Array P = new Array(p);
-		
-		Array sight = Projections.applyPerspectiveTransformation(P, C);
-		Array screen = Projections.projectPerspective(P, d,hx,hy);		
-		System.out.println(sight);
-	}
+//	public static void main(String []args) {
+//		double c [][]= {{1,1,2}};
+//		Array C = new Array(c);
+//		double n [][]= {{-1,-1,-1}};
+//		Array N = new Array(n);
+//		double v [][]= {{0,0,1}};
+//		Array V = new Array(v);
+//		
+//		double d = 1,hx = 1, hy = 1;
+//		
+//		Projections.computePerspectiveMatrix(N, V);
+//		 
+//		double p [][] = {{1,-3,-5}};
+//		Array P = new Array(p);
+//		
+//		Array sight = Projections.applyPerspectiveTransformation(P, C);
+//		Array screen = Projections.projectPerspective(P, d,hx,hy);		
+//		System.out.println(sight);
+//	}
 }

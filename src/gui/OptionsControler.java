@@ -87,7 +87,7 @@ public class OptionsControler implements Initializable{
 		gc = canvas.getGraphicsContext2D();			
 		this.width = canvas.getWidth();
 		this.height= canvas.getHeight();	
-		zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
+		this.zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		this.gc.setFill(Color.BLACK);
 		this.gc.fillRect(0, 0, width, height);
 		this.initializeCameraParameters();		
@@ -300,27 +300,29 @@ public class OptionsControler implements Initializable{
 		double  xmin  = screenCoordinates[0][0];
 		double  xmax  = screenCoordinates[0][0];
 		
+		//Creating array objects from points
+		double a[][] = {screenCoordinates[0]};
+		double b[][] = new double[1][2];
+		if(isSwaped) {
+			b[0] = division;
+		}	
+		else { 
+			b[0] = screenCoordinates[1];
+		}
+		double c[][] = {screenCoordinates[2]};
+		Array A = new Array(a);
+		Array B = new Array(b);
+		Array C = new Array(c);
+		
 		for(int yscan=(int)screenCoordinates[0][1]; yscan<= screenCoordinates[1][1];yscan++) {			
 			int min = (int)Math.floor(xmin+0.5);
 			int max = (int)Math.floor(xmax+0.5);
 			for(int j = min; j <= max; j++ ) {
 				
-				//Creating array objects from points
-				double a[][] = {screenCoordinates[0]};
-				double b[][] = new double[1][2];
-				if(isSwaped) {
-					b[0] = division;
-				}	
-				else { 
-					b[0] = screenCoordinates[1];
-				}
-				double c[][] = {screenCoordinates[2]};
 				double p[][] = {{(double)j,(double)yscan}};
-				Array A = new Array(a);
-				Array B = new Array(b);
-				Array C = new Array(c);
 				Array P = new Array(p);
 				this.zbuffering(P,A,B,C,j,yscan);
+//				this.gc.fillRect(j,yscan,1,1);
 			}
 			xmin += 1/(a1+epsilon);
 			xmax += 1/(a2+epsilon);
@@ -338,23 +340,11 @@ public class OptionsControler implements Initializable{
 		for(int yscan=(int)screenCoordinates[2][1]; yscan>= (int)screenCoordinates[1][1];yscan--) {			
 			int min = (int)Math.floor(xmin+0.5);
 			int max = (int)Math.floor(xmax+0.5);
-			for(int j = min; j <= max; j++ ) {
-				//Creating array objects from points
-				double a[][] = {screenCoordinates[0]};
-				double b[][] = new double[1][2];
-				if(isSwaped) {
-					b[0] = division;
-				}	
-				else { 
-					b[0] = screenCoordinates[1];
-				}
-				double c[][] = {screenCoordinates[2]};
+			for(int j = min; j <= max; j++ ) {				
 				double p[][] = {{(double)j,(double)yscan}};
-				Array A = new Array(a);
-				Array B = new Array(b);
-				Array C = new Array(c);
 				Array P = new Array(p);
 				this.zbuffering(P,A,B,C,j,yscan);
+//				this.gc.fillRect(j,yscan,1,1);
 			}			
 			xmin -= 1/(a1+epsilon);
 			xmax -= 1/(a2+epsilon);
