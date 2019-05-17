@@ -87,11 +87,22 @@ public class OptionsControler implements Initializable{
 		gc = canvas.getGraphicsContext2D();			
 		this.width = canvas.getWidth();
 		this.height= canvas.getHeight();	
-		zbuffer = new Array((int)width,(int)height);
+		zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		this.gc.setFill(Color.BLACK);
 		this.gc.fillRect(0, 0, width, height);
 		this.initializeCameraParameters();		
 		this.drawDefaultShape();
+	}
+	
+	
+	public double[][] initializeZbufferMatrix(int width,int height) {
+		double zbuffer[][] = new double[width][height];
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				zbuffer[i][j] = Double.MIN_VALUE;
+			}
+		}
+		return zbuffer;		
 	}
 	
 	private void initializeCameraParameters() { 
@@ -111,7 +122,8 @@ public class OptionsControler implements Initializable{
 	}
 	
 	public void drawDefaultShape() {
-		Shape s = sr.read(objects[5]);
+		this.selectedShape = objects[0];
+		Shape s = sr.read(objects[0]);
 		iterateOverTriangles(s,gc);
 	}
 	
@@ -133,7 +145,7 @@ public class OptionsControler implements Initializable{
 	public void selectShapeCallback(String shapeSelected) {
 		gc.setFill(Color.BLACK);
 		gc.fillRect(0,0, this.width,this.height);
-		zbuffer = new Array((int)width,(int)height);
+		zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		Shape s = sr.read(shapeSelected);
 		iterateOverTriangles(s,gc);
 		this.currentShape = shapeSelected;
@@ -256,24 +268,24 @@ public class OptionsControler implements Initializable{
 		for(int k =1;k < screenCoordinates.length; k++) {
 			int j = k-1;
 			double el[] = screenCoordinates[k];
+			double el2[] = sightCoordinates[k];
 			while(j >=0  && el[1] < screenCoordinates[j][1]) {				
 				screenCoordinates[j+1] = screenCoordinates[j];
+				sightCoordinates[j+1]  = sightCoordinates[j];
 				j--;
 			}
 			screenCoordinates[j+1] = el;
+			sightCoordinates[j+1]  = el2;
 		}
 		
 		//calculate division point
-		double deltaMiddle = screenCoordinates[1][1] - screenCoordinates[0][1];
-		double deltaBottom = screenCoordinates[2][1] - screenCoordinates[0][1];
-		double deltaXBottom = screenCoordinates[2][0] - screenCoordinates[0][0];
-		double xTop = screenCoordinates[0][0];
-		double division [] = {xTop + (deltaMiddle/deltaBottom)*deltaXBottom,screenCoordinates[1][1]};
-		
+		double division [] = calculateTriangleDivisionPoint(screenCoordinates);		
+		boolean isSwaped = false;
 		if(screenCoordinates[1][0] > division[0]) {
 			double swap[] = screenCoordinates[1];
 			screenCoordinates[1] = division;
 			division = swap;
+			isSwaped = true;
 		}
 		
 		//rasterizing first half of the triangle
@@ -282,7 +294,8 @@ public class OptionsControler implements Initializable{
 				    (screenCoordinates[1][0] - screenCoordinates[0][0]+epsilon));			
 
 		double a2 = ((division[1] - screenCoordinates[0][1])/
-			    	 (division[0] - screenCoordinates[0][0]+epsilon));	
+			    	 (division[0] - screenCoordinates[0][0]+epsilon));
+		
 		
 		double  xmin  = screenCoordinates[0][0];
 		double  xmax  = screenCoordinates[0][0];
@@ -293,25 +306,21 @@ public class OptionsControler implements Initializable{
 			for(int j = min; j <= max; j++ ) {
 				
 				//Creating array objects from points
-				double a[][] = {{screenCoordinates[0][0],screenCoordinates[0][1]}};
-				double b[][] = {{Math.floor(xmin+0.5),(double)yscan}};
-				double c[][] = {{Math.floor(xmax+0.5),(double)yscan}};
+				double a[][] = {screenCoordinates[0]};
+				double b[][] = new double[1][2];
+				if(isSwaped) {
+					b[0] = division;
+				}	
+				else { 
+					b[0] = screenCoordinates[1];
+				}
+				double c[][] = {screenCoordinates[2]};
 				double p[][] = {{(double)j,(double)yscan}};
 				Array A = new Array(a);
 				Array B = new Array(b);
 				Array C = new Array(c);
 				Array P = new Array(p);
-				
-				if(j> min && j < max) {
-					this.zbuffering(P,A,B,C,j,yscan);
-				}
-				else if(j== min) {					
-					this.zbuffering(B,A,B,C,j,yscan);
-				}
-				else if(j==max) {
-					this.zbuffering(C,A,B,C,j,yscan);
-				}
-				//gc.fillRect(j, yscan, 1, 1);
+				this.zbuffering(P,A,B,C,j,yscan);
 			}
 			xmin += 1/(a1+epsilon);
 			xmax += 1/(a2+epsilon);
@@ -331,25 +340,21 @@ public class OptionsControler implements Initializable{
 			int max = (int)Math.floor(xmax+0.5);
 			for(int j = min; j <= max; j++ ) {
 				//Creating array objects from points
-				double a[][] = {{screenCoordinates[2][0],screenCoordinates[2][1]}};
-				double b[][] = {{Math.floor(xmin+0.5),(double)yscan}};
-				double c[][] = {{Math.floor(xmax+0.5),(double)yscan}};
+				double a[][] = {screenCoordinates[0]};
+				double b[][] = new double[1][2];
+				if(isSwaped) {
+					b[0] = division;
+				}	
+				else { 
+					b[0] = screenCoordinates[1];
+				}
+				double c[][] = {screenCoordinates[2]};
 				double p[][] = {{(double)j,(double)yscan}};
 				Array A = new Array(a);
 				Array B = new Array(b);
 				Array C = new Array(c);
 				Array P = new Array(p);
-				
-				if(j> min && j < max) {
-					this.zbuffering(P,A,B,C,j,yscan);
-				}
-				else if(j== min) {					
-					this.zbuffering(B,A,B,C,j,yscan);
-				}
-				else if(j==max) {
-					this.zbuffering(C,A,B,C,j,yscan);
-				}
-				//gc.fillRect(j, yscan, 1, 1);
+				this.zbuffering(P,A,B,C,j,yscan);
 			}			
 			xmin -= 1/(a1+epsilon);
 			xmax -= 1/(a2+epsilon);
@@ -371,7 +376,16 @@ public class OptionsControler implements Initializable{
 		}
 	}
 	
-	//Utils	
+	//Utils
+	public double[] calculateTriangleDivisionPoint(double d[][]) {
+		double deltaMiddle = d[1][1] - d[0][1];
+		double deltaBottom = d[2][1] - d[0][1];
+		double deltaXBottom = d[2][0] - d[0][0];
+		double xTop = d[0][0];
+		double value[] = {xTop + (deltaMiddle/deltaBottom)*deltaXBottom,d[1][1]};
+		return value;		
+	}
+	
 	public Array createArrayFromTextFieldValues(@SuppressWarnings("exports") TextField tField,Array A) {
 		String values = tField.getText() + " ";
 		String number ="";
