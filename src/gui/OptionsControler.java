@@ -65,8 +65,33 @@ public class OptionsControler implements Initializable{
 	@FXML
 	TextField txtFieldD;
 	
+	//Illumination and colloring
+	@FXML
+	TextField txtFieldIamb;
+	
+	@FXML
+	TextField txtFieldIl;
+	
+	@FXML
+	TextField txtFieldOd;
+	
+	@FXML
+	TextField txtFieldPl;
+		
+	@FXML
+	TextField txtFieldKs;
+	
+	@FXML
+	TextField txtFieldKa;
+	
+	@FXML
+	TextField txtFieldEta;
+	
 	@FXML
 	Button btnCalculate;
+	
+	@FXML
+	TextField txtFieldKd;
 	
 	GraphicsContext gc;
 	//Arrays
