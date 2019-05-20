@@ -36,8 +36,8 @@ public class OptionsControler implements Initializable{
 	double height;
 	
 	ShapeReader sr = new ShapeReader();
-	String selectedShape= objects[5];
-	String tempSelected = objects[5];
+	String selectedShape= objects[3];
+	String tempSelected = objects[3];
 	Array zbuffer;
 	//Variables from FXML
 	@FXML
@@ -78,7 +78,7 @@ public class OptionsControler implements Initializable{
 	double hy;
 	double d;
 	//Current Shape
-	String currentShape = "calice2.byu";
+	String currentShape = "vaso.byu";
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -99,7 +99,7 @@ public class OptionsControler implements Initializable{
 		double zbuffer[][] = new double[width][height];
 		for(int i = 0; i < width; i++) {
 			for(int j = 0; j < height; j++) {
-				zbuffer[i][j] = Double.MIN_VALUE;
+				zbuffer[i][j] = Double.MAX_VALUE;
 			}
 		}
 		return zbuffer;		
@@ -122,8 +122,8 @@ public class OptionsControler implements Initializable{
 	}
 	
 	public void drawDefaultShape() {
-		this.selectedShape = objects[0];
-		Shape s = sr.read(objects[0]);
+		this.selectedShape = objects[3];
+		Shape s = sr.read(this.selectedShape);
 		iterateOverTriangles(s,gc);
 	}
 	
@@ -162,7 +162,7 @@ public class OptionsControler implements Initializable{
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
 		Projections.computePerspectiveMatrix(this.N, this.V);
-		zbuffer = new Array((int)width,(int)height);
+		this.zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		ShapeReader sr = new ShapeReader();
 		Shape s = sr.read(this.currentShape);
 		iterateOverTriangles(s,gc);
@@ -356,9 +356,9 @@ public class OptionsControler implements Initializable{
 		//The i and j represent the screen coordinates
 		//It recieves 3 arrays in order to calculat the baricentric coordinates
 		Array baricords = Linear.getBarycentricCoordinates(P, A, B, C);
-		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {
+		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {			
 			double value = this.zbuffer.getItem(i,j); 
-			if(value < baricords.getItem(0,2)) {
+			if(value >= baricords.getItem(0,2)) {
 				//draw point and save the new value
 				this.zbuffer.setItem(baricords.getItem(0,2),i,j);
 				this.gc.fillRect(i,j,1,1);
