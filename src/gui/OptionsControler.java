@@ -94,6 +94,7 @@ public class OptionsControler implements Initializable{
 	TextField txtFieldKd;
 	
 	GraphicsContext gc;
+	//Camera Parameters
 	//Arrays
 	Array N  = new Array(1,3);
 	Array V  = new Array(1,3);
@@ -102,6 +103,17 @@ public class OptionsControler implements Initializable{
 	double hx;
 	double hy;
 	double d;
+	
+	//Illumination and coloring
+	Array Iamb = new Array(1,3);
+	Array Il = new Array(1,3);
+	Array Od = new Array(1,3);
+	Array Pl = new Array(1,3);
+	Array Kd = new Array(1,3);
+	
+	double Ks;
+	double Ka;
+	double Eta;
 	//Current Shape
 	String currentShape = "vaso.byu";
 	
@@ -157,7 +169,14 @@ public class OptionsControler implements Initializable{
 		this.txtFieldKs.setText("0.5");
 		this.txtFieldEta.setText("1");
 		
-	
+		this.Iamb = this.createArrayFromTextFieldValues(txtFieldIamb, Iamb);
+		this.Il  = this.createArrayFromTextFieldValues(txtFieldIl, Il);
+		this.Pl  = this.createArrayFromTextFieldValues(txtFieldPl, Pl);
+		this.Kd  = this.createArrayFromTextFieldValues(txtFieldKd, Kd);
+		this.Od  = this.createArrayFromTextFieldValues(txtFieldKd, Od);
+		this.Ka  = this.readScalarsFromTextField(this.txtFieldKa);
+		this.Ks  = this.readScalarsFromTextField(this.txtFieldKs);
+		this.Eta  = this.readScalarsFromTextField(this.txtFieldEta);
 	}
 	
 	public void drawDefaultShape() {
