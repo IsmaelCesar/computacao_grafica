@@ -131,19 +131,33 @@ public class OptionsControler implements Initializable{
 	}
 	
 	private void initializeCameraParameters() { 
+		//Camera parameters
 		this.txtFieldN.setText("0 1.4 -1");
 		this.txtFieldV.setText("0 -1 -1");
 		this.txtFieldC.setText("0 -500 500");
 		this.txtFieldHX.setText("1.5");
 		this.txtFieldHY.setText("1.5");
 		this.txtFieldD.setText("7");
+		
 		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
 		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
 		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
 		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
-		Projections.computePerspectiveMatrix(this.N, this.V);	
+		Projections.computePerspectiveMatrix(this.N, this.V);
+		
+		//Illumination and coloring
+		this.txtFieldIamb.setText("100 100 100");
+		this.txtFieldIl.setText("127 213 254");
+		this.txtFieldPl.setText("60 5 -10");
+		this.txtFieldKd.setText("0.5 0.3 0.2");
+		this.txtFieldOd.setText("0.7 0.5 0.8");
+		this.txtFieldKa.setText("0.2");
+		this.txtFieldKs.setText("0.5");
+		this.txtFieldEta.setText("1");
+		
+	
 	}
 	
 	public void drawDefaultShape() {

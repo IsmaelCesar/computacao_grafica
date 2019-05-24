@@ -56,21 +56,21 @@
                <children>
                   <Text layoutX="16.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Illlumination &amp; Coloring" wrappingWidth="163.7294921875" />
                   <Button id="btnCalculate" fx:id="btnCalculate" layoutX="45.0" layoutY="236.0" mnemonicParsing="false" onAction="#calculateAndDraw" prefHeight="26.0" prefWidth="131.0" text="Calculate" />
-                  <TextField id="txtFieldN" fx:id="textFieldIamb" layoutX="45.0" layoutY="37.0" prefHeight="26.0" prefWidth="131.0" promptText="IaR IaG IaB" />
+                  <TextField id="txtFieldIamb" fx:id="txtFieldIamb" layoutX="45.0" layoutY="37.0" prefHeight="26.0" prefWidth="131.0" promptText="IaR IaG IaB" />
                   <Text layoutX="6.0" layoutY="54.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Iamb:" />
-                  <TextField id="txtFieldN" fx:id="textFieldIl" layoutX="45.0" layoutY="69.0" prefHeight="26.0" prefWidth="131.0" promptText="IlR IlG IlB" />
+                  <TextField id="txtFieldIl" fx:id="txtFieldIl" layoutX="45.0" layoutY="69.0" prefHeight="26.0" prefWidth="131.0" promptText="IlR IlG IlB" />
                   <Text layoutX="4.0" layoutY="86.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ILight:" />
-                  <TextField id="txtFieldN" fx:id="textFieldOd" layoutX="45.0" layoutY="101.0" prefHeight="26.0" prefWidth="131.0" promptText="OdR OdG OdB" />
+                  <TextField id="txtFieldOd" fx:id="txtFieldOd" layoutX="45.0" layoutY="101.0" prefHeight="26.0" prefWidth="131.0" promptText="OdR OdG OdB" />
                   <Text layoutX="21.0" layoutY="121.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Od:" />
-                  <TextField id="txtFieldN" fx:id="textFieldPl" layoutX="44.0" layoutY="133.0" prefHeight="26.0" prefWidth="131.0" promptText="PlR PlG PlB" />
+                  <TextField id="txtFieldPl" fx:id="txtFieldPl" layoutX="44.0" layoutY="133.0" prefHeight="26.0" prefWidth="131.0" promptText="PlR PlG PlB" />
                   <Text layoutX="20.0" layoutY="150.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Pl:" />
                   <Text layoutX="12.0" layoutY="185.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Ks:" />
-                  <TextField id="txtFieldN" fx:id="textFieldKs" layoutX="34.0" layoutY="167.0" prefHeight="26.0" prefWidth="37.0" promptText="Ks" />
+                  <TextField id="txtFieldKs" fx:id="txtFieldKs" layoutX="34.0" layoutY="167.0" prefHeight="26.0" prefWidth="37.0" promptText="Ks" />
                   <Text layoutX="75.0" layoutY="185.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Ka:" />
-                  <TextField id="txtFieldN" fx:id="textFieldKa" layoutX="97.0" layoutY="167.0" prefHeight="26.0" prefWidth="37.0" promptText="Ka" />
+                  <TextField id="txtFieldKa" fx:id="txtFieldKa" layoutX="97.0" layoutY="167.0" prefHeight="26.0" prefWidth="37.0" promptText="Ka" />
                   <Text layoutX="138.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="n:" />
-                  <TextField id="txtFieldN" fx:id="textFieldEta" layoutX="160.0" layoutY="168.0" prefHeight="26.0" prefWidth="37.0" promptText="n" />
-                  <TextField id="txtFieldN" fx:id="textFieldKd" layoutX="42.0" layoutY="201.0" prefHeight="26.0" prefWidth="131.0" promptText="KdR KdG KdB" />
+                  <TextField id="txtFieldEta" fx:id="txtFieldEta" layoutX="160.0" layoutY="168.0" prefHeight="26.0" prefWidth="37.0" promptText="n" />
+                  <TextField id="txtFieldKd" fx:id="txtFieldKd" layoutX="42.0" layoutY="201.0" prefHeight="26.0" prefWidth="131.0" promptText="KdR KdG KdB" />
                   <Text layoutX="18.0" layoutY="218.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Kd:" />
                </children>
             </Pane>
