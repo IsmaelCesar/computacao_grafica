@@ -136,7 +136,7 @@ public class OptionsControler implements Initializable{
 		this.txtFieldC.setText("0 -500 500");
 		this.txtFieldHX.setText("1.5");
 		this.txtFieldHY.setText("1.5");
-		this.txtFieldD.setText("7");		
+		this.txtFieldD.setText("7");
 		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
 		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
 		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
