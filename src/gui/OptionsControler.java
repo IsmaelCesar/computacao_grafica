@@ -310,13 +310,10 @@ public class OptionsControler implements Initializable{
 	public void rasterizeTriangle(Array triangle[],@SuppressWarnings("exports") GraphicsContext gc) {
 		//Projecting vertices and getting screen coordinates
 		Array aux = null;
-		double sightCoordinates [][] = new double [3][2];
 		double screenCoordinates [][] = new double [3][2];
 		for(int k =0;k < triangle.length; k++) {
 			aux = Projections.applyPerspectiveTransformation(triangle[k], this.C).t();
 			aux = Projections.projectPerspective(aux, this.d, this.hx, this.hx).t();
-			sightCoordinates[k][0] = aux.getItem(0, 0);
-			sightCoordinates[k][1] = aux.getItem(0, 1);
 			screenCoordinates[k][0] = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
 			screenCoordinates[k][1] = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
 			
@@ -326,14 +323,11 @@ public class OptionsControler implements Initializable{
 		for(int k =1;k < screenCoordinates.length; k++) {
 			int j = k-1;
 			double el[] = screenCoordinates[k];
-			double el2[] = sightCoordinates[k];
 			while(j >=0  && el[1] < screenCoordinates[j][1]) {				
 				screenCoordinates[j+1] = screenCoordinates[j];
-				sightCoordinates[j+1]  = sightCoordinates[j];
 				j--;
 			}
 			screenCoordinates[j+1] = el;
-			sightCoordinates[j+1]  = el2;
 		}
 		
 		//calculate division point
@@ -379,8 +373,7 @@ public class OptionsControler implements Initializable{
 				
 				double p[][] = {{(double)j,(double)yscan}};
 				Array P = new Array(p);
-				this.zbuffering(P,A,B,C,j,yscan);
-//				this.gc.fillRect(j,yscan,1,1);
+				this.zbuffering(P,A,B,C,triangle,j,yscan);
 			}
 			xmin += 1/(a1+epsilon);
 			xmax += 1/(a2+epsilon);
@@ -401,8 +394,7 @@ public class OptionsControler implements Initializable{
 			for(int j = min; j <= max; j++ ) {				
 				double p[][] = {{(double)j,(double)yscan}};
 				Array P = new Array(p);
-				this.zbuffering(P,A,B,C,j,yscan);
-//				this.gc.fillRect(j,yscan,1,1);
+				this.zbuffering(P,A,B,C,triangle,j,yscan);
 			}			
 			xmin -= 1/(a1+epsilon);
 			xmax -= 1/(a2+epsilon);
@@ -410,7 +402,7 @@ public class OptionsControler implements Initializable{
 	}
 	
 	
-	public void zbuffering(Array P,Array A, Array B, Array C,int i,int j) {
+	public void zbuffering(Array P,Array A, Array B, Array C,Array triangle[],int i,int j) {
 		//The i and j represent the screen coordinates
 		//It recieves 3 arrays in order to calculat the baricentric coordinates
 		Array baricords = Linear.getBarycentricCoordinates(P, A, B, C);
@@ -422,6 +414,17 @@ public class OptionsControler implements Initializable{
 				this.gc.fillRect(i,j,1,1);
 			}
 		}
+	}
+	
+	public void illuminationAndColloring(Array triangle[],Array baricords,int i,int j) {
+		Array v1 = Linear.subtraction(triangle[0], triangle[1]);
+		Array v2 = Linear.subtraction(triangle[0], triangle[2]);
+		
+		Array normVector = Linear.cross(v1, v2).normalization();
+		Array ambientalComponent = Linear.dotScalar(this.Ka, this.Iamb);
+		
+		
+		
 	}
 	
 	//Utils

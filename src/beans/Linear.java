@@ -222,6 +222,28 @@ public class Linear {
 		return result;
 	}
 	
+	public static Array componentwiseMultiplication(Array A,Array B) {
+		Array result = new Array(A.getRows_dim(),A.getDim());
+		if(A.getRows_dim() == B.getRows_dim()) {
+			if(A.getDim() == B.getDim()) {
+				
+				for(int i =0; i < A.getRows_dim(); i++) {
+					for(int j = 0; j < A.getDim(); j++) {
+						result.
+					}
+				}
+				
+			}
+			else
+				throw new IllegalArgumentException("The dimentions of both arrays must match");			
+		}
+		else
+			throw new IllegalArgumentException("The dimentions of both arrays must match");
+		
+		
+		return result;		
+	}
+	
 	//Implementations of projections
 	public static class Projections{
 		
