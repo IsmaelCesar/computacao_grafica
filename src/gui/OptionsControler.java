@@ -421,9 +421,20 @@ public class OptionsControler implements Initializable{
 		Array v2 = Linear.subtraction(triangle[0], triangle[2]);
 		
 		Array normVector = Linear.cross(v1, v2).normalization();
-		Array ambientalComponent = Linear.dotScalar(this.Ka, this.Iamb);
+		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);
 		
+		Array L = Linear.subtraction(baricords, this.Pl).normalization();
 		
+		//Computing the difuse combonent Of light
+		Array Aux = Linear.componentwiseMultiplication(this.Il, this.Od);
+		Aux = Linear.componentwiseMultiplication(Aux,this.Kd);
+		Array dotNL = Linear.dot(normVector, L.t());
+		Array Id = new Array(1,3);
+		if(dotNL.getItem(0,0)>0) {
+			Id = Linear.dotScalar(dotNL.getItem(0, 0), Aux);
+		}
+		
+		//
 		
 	}
 	
