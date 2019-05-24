@@ -76,6 +76,6 @@
             </Pane>
          </children>
       </GridPane>
-      <Canvas id="canvas" fx:id="canvas" height="500.0" width="500.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+      <Canvas id="canvas" fx:id="canvas" height="500.0" style="-fx-background-color: #000000;" width="500.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
    </children>
 </GridPane>
