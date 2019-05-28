@@ -423,20 +423,19 @@ public class OptionsControler implements Initializable{
 		Array normVector = Linear.cross(v2, v1).normalization();
 		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);	
 		
-		Array L = Linear.subtraction(baricords, this.Pl).normalization();
+		Array L = Linear.subtraction(this.Pl,baricords).normalization();
 				
 		Array dotNL = Linear.dot(normVector, L.t());
 		if(dotNL.getItem(0, 0)!=0) {	
-			
+			Array Id = new Array(1,3);
+			//Computing the difuse component Of light
 			if(dotNL.getItem(0, 0) < 0) {
 				normVector = Linear.dotScalar(-1, normVector);
 				dotNL = Linear.dot(normVector, L.t());
-			}
-			//Computing the difuse component Of light
-			Array Id = new Array(1,3);
-			Array Aux = Linear.componentwiseMultiplication(this.Il, this.Od);
-			Aux = Linear.componentwiseMultiplication(Aux,this.Kd);
-			Id = Linear.dotScalar(dotNL.getItem(0, 0), Aux);
+				Array Aux = Linear.componentwiseMultiplication(this.Il, this.Od);
+				Aux = Linear.componentwiseMultiplication(Aux,this.Kd);
+				Id = Linear.dotScalar(dotNL.getItem(0, 0), Aux);
+			}		
 			
 			//Computing the specular component of color
 			Array Is = new Array(1,3);
