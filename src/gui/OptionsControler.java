@@ -411,7 +411,6 @@ public class OptionsControler implements Initializable{
 			if(value >= baricords.getItem(0,2)) {
 				//draw point and save the new value
 				this.zbuffer.setItem(baricords.getItem(0,2),i,j);
-				//this.gc.fillRect(i,j,1,1);
 				this.illuminationAndColloring(triangle, baricords, i, j);
 			}
 		}
@@ -421,8 +420,8 @@ public class OptionsControler implements Initializable{
 		Array v1 = Linear.subtraction(triangle[0], triangle[1]);
 		Array v2 = Linear.subtraction(triangle[0], triangle[2]);
 		
-		Array normVector = Linear.cross(v1, v2).normalization();
-		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);
+		Array normVector = Linear.cross(v2, v1).normalization();
+		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);	
 		
 		Array L = Linear.subtraction(baricords, this.Pl).normalization();
 				
@@ -444,7 +443,7 @@ public class OptionsControler implements Initializable{
 			double aux = 2*Linear.dot(normVector, L.t()).getItem(0, 0);
 			Array R = Linear.scalarSubtraction(aux, L);
 			Array camVector = Linear.subtraction(baricords, this.C).normalization();
-			Array rvAngle = Linear.dot(R,camVector);
+			Array rvAngle = Linear.dot(R,camVector.t());
 			if(rvAngle.getItem(0,0) > 0) {
 				double base = Math.pow(rvAngle.getItem(0, 0), this.Eta);
 				base = base*this.Ks;
@@ -452,7 +451,7 @@ public class OptionsControler implements Initializable{
 			}
 			
 			Array Ipoint = Linear.sum(Linear.sum(Ia, Id),Is);
-			Color c = Color.color(Ipoint.getItem(0, 0),Ipoint.getItem(0, 1),Ipoint.getItem(0, 2));
+			Color c = Color.rgb((int)Ipoint.getItem(0, 0),(int)Ipoint.getItem(0, 1),(int)Ipoint.getItem(0, 2));
 			this.gc.setFill(c);
 			this.gc.fillRect(i,j,1,1);
 		}

@@ -229,7 +229,7 @@ public class Linear {
 				
 				for(int i =0; i < A.getRows_dim(); i++) {
 					for(int j = 0; j < A.getDim(); j++) {
-						result.
+						result.setItem(A.getItem(i, j)*B.getItem(i, j),i,j);
 					}
 				}
 				
@@ -238,10 +238,21 @@ public class Linear {
 				throw new IllegalArgumentException("The dimentions of both arrays must match");			
 		}
 		else
-			throw new IllegalArgumentException("The dimentions of both arrays must match");
-		
-		
+			throw new IllegalArgumentException("The dimentions of both arrays must match");		
 		return result;		
+	}
+	
+	public static Array scalarSubtraction(double lambda,Array A) {
+		//labmda - A
+		Array result = new Array(A.getRows_dim(),A.getDim());
+		
+		for(int i = 0; i < A.getRows_dim();i++) {
+			for(int j = 0; j< A.getDim();j++) {
+				result.setItem(lambda - A.getItem(i, j), i, j);
+			}			
+		}
+		
+		return result;
 	}
 	
 	//Implementations of projections
