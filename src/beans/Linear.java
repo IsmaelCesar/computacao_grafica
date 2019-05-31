@@ -41,6 +41,7 @@ public class Linear {
 		
 	}
 	
+	
 	public static Array sum(Array A,Array B) {
 		Array result = null;
 		

@@ -311,8 +311,14 @@ public class OptionsControler implements Initializable{
 		//Projecting vertices and getting screen coordinates
 		Array aux = null;
 		double screenCoordinates [][] = new double [3][2];
+		double sightCoordinates[][] = new double [3][3];
 		for(int k =0;k < triangle.length; k++) {
 			aux = Projections.applyPerspectiveTransformation(triangle[k], this.C).t();
+			
+			sightCoordinates[k][0] = aux.getItem(0, 0);
+			sightCoordinates[k][1] = aux.getItem(0, 1);
+			sightCoordinates[k][2] = aux.getItem(0, 2);
+			
 			aux = Projections.projectPerspective(aux, this.d, this.hx, this.hx).t();
 			screenCoordinates[k][0] = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
 			screenCoordinates[k][1] = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
@@ -323,11 +329,14 @@ public class OptionsControler implements Initializable{
 		for(int k =1;k < screenCoordinates.length; k++) {
 			int j = k-1;
 			double el[] = screenCoordinates[k];
+			double el2[] = sightCoordinates[k];
 			while(j >=0  && el[1] < screenCoordinates[j][1]) {				
 				screenCoordinates[j+1] = screenCoordinates[j];
+				sightCoordinates[j+1]  = sightCoordinates[j];
 				j--;
-			}
+			}			
 			screenCoordinates[j+1] = el;
+			sightCoordinates[j+1]  = el2;
 		}
 		
 		//calculate division point
@@ -354,6 +363,10 @@ public class OptionsControler implements Initializable{
 		
 		//Creating array objects from points
 		double a[][] = {screenCoordinates[0]};
+		//Setting an auxiliary variable for the third point of the triangle before taking the 
+		//division point
+		double b_bar[][] = {screenCoordinates[1]}; //Gambiarra - DON'T TOUCH IT!
+		
 		double b[][] = new double[1][2];
 		if(isSwaped) {
 			b[0] = division;
@@ -362,9 +375,14 @@ public class OptionsControler implements Initializable{
 			b[0] = screenCoordinates[1];
 		}
 		double c[][] = {screenCoordinates[2]};
-		Array A = new Array(a);
-		Array B = new Array(b);
-		Array C = new Array(c);
+		
+		double a_sight [][] = {sightCoordinates[0]};
+		double b_sight [][] = {sightCoordinates[1]};
+		double c_sight [][] = {sightCoordinates[2]};
+		
+		Array triangleScreenCoords[] = {new Array(a),new Array(b_bar),new Array(c)};
+		Array triangleSightCoords[]  = {new Array(a_sight),new Array(b_sight),new Array(c_sight),};
+		
 		
 		for(int yscan=(int)screenCoordinates[0][1]; yscan<= screenCoordinates[1][1];yscan++) {			
 			int min = (int)Math.floor(xmin+0.5);
@@ -373,7 +391,7 @@ public class OptionsControler implements Initializable{
 				
 				double p[][] = {{(double)j,(double)yscan}};
 				Array P = new Array(p);
-				this.zbuffering(P,A,B,C,triangle,j,yscan);
+				this.zbuffering(P,triangleScreenCoords,triangleSightCoords,j,yscan);
 			}
 			xmin += 1/(a1+epsilon);
 			xmax += 1/(a2+epsilon);
@@ -394,7 +412,7 @@ public class OptionsControler implements Initializable{
 			for(int j = min; j <= max; j++ ) {				
 				double p[][] = {{(double)j,(double)yscan}};
 				Array P = new Array(p);
-				this.zbuffering(P,A,B,C,triangle,j,yscan);
+				this.zbuffering(P,triangleScreenCoords,triangleSightCoords,j,yscan);
 			}			
 			xmin -= 1/(a1+epsilon);
 			xmax -= 1/(a2+epsilon);
@@ -402,16 +420,24 @@ public class OptionsControler implements Initializable{
 	}
 	
 	
-	public void zbuffering(Array P,Array A, Array B, Array C,Array triangle[],int i,int j) {
+	public void zbuffering(Array P,Array tScreen[],Array tSight[],int i,int j) {
 		//The i and j represent the screen coordinates
 		//It recieves 3 arrays in order to calculat the baricentric coordinates
-		Array baricords = Linear.getBarycentricCoordinates(P, A, B, C);
+		Array baricords = Linear.getBarycentricCoordinates(P, tScreen[0],tScreen[1], tScreen[2]);
+		
+		//Getting sight coordinates for p
+		Array interp_a  = Linear.dotScalar(baricords.getItem(0, 0), tSight[0]);
+		Array interp_b  = Linear.dotScalar(baricords.getItem(0, 1), tSight[1]);
+		Array interp_c  = Linear.dotScalar(baricords.getItem(0, 2), tSight[2]);
+		Array P_sight   = Linear.sum(Linear.sum(interp_a,interp_b),interp_c);
+		
 		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {			
 			double value = this.zbuffer.getItem(i,j); 
-			if(value >= baricords.getItem(0,2)) {
+			if(value >= P_sight.getItem(0,2)) {
 				//draw point and save the new value
 				this.zbuffer.setItem(baricords.getItem(0,2),i,j);
-				this.illuminationAndColloring(triangle, baricords, i, j);
+				this.gc.fillRect(i, j, 1, 1);
+				//this.illuminationAndColloring(tSight, P_sight, i, j);
 			}
 		}
 	}

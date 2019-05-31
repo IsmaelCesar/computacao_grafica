@@ -70,10 +70,6 @@ public class Array {
 				 transposed_array[j][i]= this.values[i][j];
 			}			
 		}
-		//this.values = transposed_array;
-		//int aux = this.dim;
-		//this.dim = this.rows_dim;
-		//this.rows_dim= aux;
 		return new Array(transposed_array);
 	}
 	
