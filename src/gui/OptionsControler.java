@@ -115,7 +115,7 @@ public class OptionsControler implements Initializable{
 	double Ka;
 	double Eta;
 	//Current Shape
-	String currentShape = "vaso.byu";
+	String currentShape = "calice2.byu";
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -180,7 +180,7 @@ public class OptionsControler implements Initializable{
 	}
 	
 	public void drawDefaultShape() {
-		this.selectedShape = objects[3];
+		this.selectedShape = objects[0];
 		Shape s = sr.read(this.selectedShape);
 		iterateOverTriangles(s,gc);
 	}
@@ -307,6 +307,10 @@ public class OptionsControler implements Initializable{
 		}		
 	}
 	
+	/**
+	 * @param triangle - Triangle in world coordinates
+	 * @param gc       - Graphics context of canvas of JavaFX object
+	 */
 	public void rasterizeTriangle(Array triangle[],@SuppressWarnings("exports") GraphicsContext gc) {
 		//Projecting vertices and getting screen coordinates
 		Array aux = null;
@@ -419,7 +423,13 @@ public class OptionsControler implements Initializable{
 		}
 	}
 	
-	
+	/**
+	 * @param P - x,y position in screen coordinates
+	 * @param tScreen - triangle in screen coordinates
+	 * @param tSight  - triangle in sight coordinates
+	 * @param i  - x position of the pixel on the screen
+	 * @param j  - y position of the pixel on the screen
+	 */
 	public void zbuffering(Array P,Array tScreen[],Array tSight[],int i,int j) {
 		//The i and j represent the screen coordinates
 		//It recieves 3 arrays in order to calculat the baricentric coordinates
@@ -437,52 +447,114 @@ public class OptionsControler implements Initializable{
 				//draw point and save the new value
 				this.zbuffer.setItem(baricords.getItem(0,2),i,j);
 				this.gc.fillRect(i, j, 1, 1);
-				//this.illuminationAndColloring(tSight, P_sight, i, j);
+				this.illuminationAndColloring(P_sight,tSight, baricords, i, j);
 			}
 		}
 	}
 	
-	public void illuminationAndColloring(Array triangle[],Array baricords,int i,int j) {
-		Array v1 = Linear.subtraction(triangle[0], triangle[1]);
-		Array v2 = Linear.subtraction(triangle[0], triangle[2]);
+	
+	/**
+	 * @param triangle  - Triangle in sight coordinates
+	 * @param baricords - Barycentric coordinates of the point
+	 * @return
+	 */
+	public Array computePointNormVector(Array triangle[],Array baricords) {
+	
+			Array v1 = Linear.subtraction(triangle[1], triangle[0]).normalization();
+			Array v2 = Linear.subtraction(triangle[2], triangle[0]).normalization();		
+			Array normVectorA = Linear.cross(v1, v2);			
+			
+			v1 = Linear.subtraction(triangle[0], triangle[1]).normalization();
+			v2 = Linear.subtraction(triangle[2], triangle[1]).normalization();		
+			Array normVectorB = Linear.cross(v1, v2);
+			
+			v1 = Linear.subtraction(triangle[0], triangle[2]).normalization();
+			v2 = Linear.subtraction(triangle[1], triangle[2]).normalization();		
+			Array normVectorC = Linear.cross(v1, v2);
+			//Norm vector of the point
+			Array interpNorm_alpha = Linear.dotScalar(baricords.getItem(0, 0),normVectorA);
+			Array interpNorm_beta  = Linear.dotScalar(baricords.getItem(0, 1),normVectorB);
+			Array interpNorm_gamma = Linear.dotScalar(baricords.getItem(0, 2),normVectorC);
+			Array normVector = Linear.sum(Linear.sum(interpNorm_alpha, interpNorm_beta),interpNorm_gamma);
+			return normVector;
+	}
+	
+	public Array computeDifuseComponent(Array normVector,Array L ) {
+		Array dotNL = Linear.dot(normVector, L.t());
+		Array Id = new Array(1,3);		
+		Array Aux = Linear.componentwiseMultiplication(this.Il, this.Od);
+		Aux = Linear.componentwiseMultiplication(Aux,this.Kd);
+		Id = Linear.dotScalar(dotNL.getItem(0, 0), Aux);
+		return Id;
+	}
+	
+	
+	public Array computeSpecularComponent(Array normVector,Array L, Array P) {
 		
-		Array normVector = Linear.cross(v2, v1).normalization();
+		Array vision = Linear.dotScalar(-1, P);
+		
+		Array Is = new Array(1,3);
+		double aux = 2*Linear.dot(normVector, L.t()).getItem(0, 0);
+		Array R = Linear.scalarSubtraction(aux, L);
+		
+		Array rvAngle = Linear.dot(R,vision.t());
+		if(rvAngle.getItem(0,0) > 0) {
+			double base = Math.pow(rvAngle.getItem(0, 0), this.Eta);
+			base = base*this.Ks;
+			Is = Linear.dotScalar(base, Il);
+		}
+		return Is;
+	}
+	
+	/**
+	 * @param P - the point corresponding the pixel in screen coordinates
+	 * @param triangle - the Triangle in sight coordinates
+	 * @param baricords - Barycentric coordinates of P based on the screen coordinates
+	 * @param i - x position of the pixel on the screen
+	 * @param j - y position of the pixel on the screen
+	 */
+	public void illuminationAndColloring(Array P,Array triangle[],Array baricords,int i,int j) {
+		
+		Array normVector = computePointNormVector(triangle,baricords);		
+		
 		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);	
 		
 		Array L = Linear.subtraction(this.Pl,baricords).normalization();
 				
 		Array dotNL = Linear.dot(normVector, L.t());
-		if(dotNL.getItem(0, 0)!=0) {	
-			Array Id = new Array(1,3);
-			//Computing the difuse component Of light
-			if(dotNL.getItem(0, 0) < 0) {
-				normVector = Linear.dotScalar(-1, normVector);
-				dotNL = Linear.dot(normVector, L.t());
-				Array Aux = Linear.componentwiseMultiplication(this.Il, this.Od);
-				Aux = Linear.componentwiseMultiplication(Aux,this.Kd);
-				Id = Linear.dotScalar(dotNL.getItem(0, 0), Aux);
-			}		
 			
-			//Computing the specular component of color
-			Array Is = new Array(1,3);
-			double aux = 2*Linear.dot(normVector, L.t()).getItem(0, 0);
-			Array R = Linear.scalarSubtraction(aux, L);
-			Array camVector = Linear.subtraction(baricords, this.C).normalization();
-			Array rvAngle = Linear.dot(R,camVector.t());
-			if(rvAngle.getItem(0,0) > 0) {
-				double base = Math.pow(rvAngle.getItem(0, 0), this.Eta);
-				base = base*this.Ks;
-				Is = Linear.dotScalar(base, Il);
-			}
+		//Computing the difuse component Of light
+		if(dotNL.getItem(0, 0) < 0) {
+			normVector = Linear.dotScalar(-1, normVector);			
+		}	
+				
+		Array Id = computeDifuseComponent(normVector,L);
+		
+		//Computing the specular component of color
 			
-			Array Ipoint = Linear.sum(Linear.sum(Ia, Id),Is);
-			Color c = Color.rgb((int)Ipoint.getItem(0, 0),(int)Ipoint.getItem(0, 1),(int)Ipoint.getItem(0, 2));
-			this.gc.setFill(c);
-			this.gc.fillRect(i,j,1,1);
-		}
+		Array Is = computeSpecularComponent(normVector,L,P);		
+		
+		Array Ipoint = Linear.sum(Linear.sum(Ia, Id),Is);
+		//veryfing if any component of the point has a value greater than 255
+		//and setting it to 255
+		for(int k = 0; k < Ipoint.getRows_dim();k++) {
+			for(int l = 0; l < Ipoint.getDim();l++) {
+				if(Ipoint.getItem(k, l) > 255) {
+					Ipoint.setItem(255, k, l);
+				}
+			}			
+		}		
+		Color c = Color.rgb((int)Ipoint.getItem(0, 0),(int)Ipoint.getItem(0, 1),(int)Ipoint.getItem(0, 2));
+		this.gc.setFill(c);
+		this.gc.fillRect(i,j,1,1);
+		
 	}
 	
 	//Utils
+	/**
+	 * @param d  - Coordinats  of the triangle 
+	 * @return   coordinates of the division point of the triangle
+	 */
 	public double[] calculateTriangleDivisionPoint(double d[][]) {
 		double deltaMiddle = d[1][1] - d[0][1];
 		double deltaBottom = d[2][1] - d[0][1];
