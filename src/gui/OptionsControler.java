@@ -460,27 +460,13 @@ public class OptionsControler implements Initializable{
 	 */
 	public Array computePointNormVector(Array triangle[],Array baricords) {
 	
-			Array v1 = Linear.subtraction(triangle[1], triangle[0]).normalization();
-			Array v2 = Linear.subtraction(triangle[2], triangle[0]).normalization();		
-			Array normVectorA = Linear.cross(v1, v2);			
-			
-			v1 = Linear.subtraction(triangle[0], triangle[1]).normalization();
-			v2 = Linear.subtraction(triangle[2], triangle[1]).normalization();		
-			Array normVectorB = Linear.cross(v1, v2);
-			
-			v1 = Linear.subtraction(triangle[0], triangle[2]).normalization();
-			v2 = Linear.subtraction(triangle[1], triangle[2]).normalization();		
-			Array normVectorC = Linear.cross(v1, v2);
-			//Norm vector of the point
-			Array interpNorm_alpha = Linear.dotScalar(baricords.getItem(0, 0),normVectorA);
-			Array interpNorm_beta  = Linear.dotScalar(baricords.getItem(0, 1),normVectorB);
-			Array interpNorm_gamma = Linear.dotScalar(baricords.getItem(0, 2),normVectorC);
-			Array normVector = Linear.sum(Linear.sum(interpNorm_alpha, interpNorm_beta),interpNorm_gamma);
-			return normVector;
+			Array v1 = Linear.subtraction(triangle[1], triangle[0]);
+			Array v2 = Linear.subtraction(triangle[2], triangle[0]);		
+			Array normVector = Linear.cross(v1, v2);			
+			return normVector.normalization();
 	}
 	
-	public Array computeDifuseComponent(Array normVector,Array L ) {
-		Array dotNL = Linear.dot(normVector, L.t());
+	public Array computeDifuseComponent(Array normVector,Array dotNL ) {
 		Array Id = new Array(1,3);		
 		Array Aux = Linear.componentwiseMultiplication(this.Il, this.Od);
 		Aux = Linear.componentwiseMultiplication(Aux,this.Kd);
@@ -489,14 +475,12 @@ public class OptionsControler implements Initializable{
 	}
 	
 	
-	public Array computeSpecularComponent(Array normVector,Array L, Array P) {
-		
-		Array vision = Linear.dotScalar(-1, P);
-		
-		Array Is = new Array(1,3);
-		double aux = 2*Linear.dot(normVector, L.t()).getItem(0, 0);
-		Array R = Linear.scalarSubtraction(aux, L);
-		
+	public Array computeSpecularComponent(Array normVector,Array L,Array vision) {
+			
+		Array Is = new Array(1,3);		
+		Array aux = Linear.dotScalar(2*Linear.dot(normVector, L.t()).getItem(0, 0),normVector);
+		Array R = Linear.subtraction(aux, L);
+				
 		Array rvAngle = Linear.dot(R,vision.t());
 		if(rvAngle.getItem(0,0) > 0) {
 			double base = Math.pow(rvAngle.getItem(0, 0), this.Eta);
@@ -516,23 +500,32 @@ public class OptionsControler implements Initializable{
 	public void illuminationAndColloring(Array P,Array triangle[],Array baricords,int i,int j) {
 		
 		Array normVector = computePointNormVector(triangle,baricords);		
+		Array vision = Linear.dotScalar(-1, P).normalization();
 		
 		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);	
 		
-		Array L = Linear.subtraction(this.Pl,baricords).normalization();
+		Array L = Linear.subtraction(this.Pl,P).normalization();
 				
 		Array dotNL = Linear.dot(normVector, L.t());
 			
 		//Computing the difuse component Of light
+		Array Id = new Array(1,3);
+		Array Is = new Array(1,3);
+		boolean keepNull = false;
 		if(dotNL.getItem(0, 0) < 0) {
-			normVector = Linear.dotScalar(-1, normVector);			
-		}	
-				
-		Array Id = computeDifuseComponent(normVector,L);
+			Array dotNV= Linear.dot(normVector, vision.t());			
+			if(dotNV.getItem(0, 0) <  0) {
+				normVector = Linear.dotScalar(-1,normVector);
+				dotNL = Linear.dot(normVector,L.t());
+			}
+			else
+				keepNull = true;				
+		}					
 		
-		//Computing the specular component of color
-			
-		Array Is = computeSpecularComponent(normVector,L,P);		
+		if(!keepNull) {
+			Id = this.computeDifuseComponent(normVector, dotNL);
+			Is = this.computeSpecularComponent(normVector, L, vision);
+		}	
 		
 		Array Ipoint = Linear.sum(Linear.sum(Ia, Id),Is);
 		//veryfing if any component of the point has a value greater than 255
