@@ -448,7 +448,7 @@ public class OptionsControler implements Initializable{
 		
 		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {			
 			double value = this.zbuffer.getItem(i,j); 
-			if(value >= P_sight.getItem(0,2)) {
+			if(P_sight.getItem(0,2) <= value) {
 				//draw point and save the new value
 				this.zbuffer.setItem(P_sight.getItem(0,2),i,j);
 				this.illuminationAndColloring(P_sight,tSight, baricords, i, j);
