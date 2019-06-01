@@ -54,10 +54,10 @@ public class Questionary {
 	}	
 	
 	public static void questao1_letraG() {
-		double p_cord [][]= {{-0.25,0.75}};
-		double a [][]= {{-1,1}};
-		double b [][]= {{0,-1}};
-		double c [][]= {{1,1}};
+		double p_cord [][]= {{1,1}};
+		double a [][]= {{1,1}};
+		double b [][]= {{1,-1}};
+		double c [][]= {{2,1}};
 		Array P = new Array(p_cord);
 		Array A = new Array(a);
 		Array B = new Array(b);
@@ -80,6 +80,7 @@ public class Questionary {
 	}
 	
 	public static void main(String []args) {
-		questao1_letraC();
+		questao1_letraG();
+		
 	}
 }
