@@ -8,7 +8,9 @@ import java.lang.Math;
 import beans.Array;
 import beans.Linear;
 import beans.Shape;
+import beans.Point;
 import beans.ShapeReader;
+import beans.PointOperations;
 import beans.Linear.Projections;
 import javafx.fxml.Initializable;
 import javafx.event.ActionEvent;
@@ -99,8 +101,12 @@ public class OptionsControler implements Initializable{
 	//Camera Parameters
 	//Arrays
 	Array N  = new Array(1,3);
+	Point pN;
 	Array V  = new Array(1,3);
+	Point pV;
 	Array C  = new Array(1,3);
+	Point pC;
+	
 	//scalars
 	double hx;
 	double hy;
@@ -152,12 +158,18 @@ public class OptionsControler implements Initializable{
 		this.txtFieldD.setText("7");
 		
 		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
+		this.pN = new Point(N);
+		
 		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
+		this.pV = new Point(V);
+		
 		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
+		this.pC = new Point(C);
+		
 		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
-		Projections.computePerspectiveMatrix(this.N, this.V);
+		PointOperations.computePerspective(this.pN, this.pV);
 		
 		//Illumination and coloring
 		this.txtFieldIamb.setText("100 100 100");
@@ -204,6 +216,7 @@ public class OptionsControler implements Initializable{
 		gc.fillRect(0,0, this.width,this.height);
 		zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		Shape s = sr.read(shapeSelected);
+		s.convertFromWorldToSight(this.pC);
 		iterateOverTriangles(s);
 		this.currentShape = shapeSelected;
 	}
@@ -212,16 +225,26 @@ public class OptionsControler implements Initializable{
 	public void calculateAndDraw(@SuppressWarnings("exports") ActionEvent event) {
 		this.gc.setFill(Color.BLACK);
 		this.gc.fillRect(0,0,this.width,this.height);
+		
 		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
+		this.pN = new Point(N);
+		
 		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
+		this.pV = new Point(V);
+		
 		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
+		this.pC = new Point(C);
+		
 		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
-		Projections.computePerspectiveMatrix(this.N, this.V);
+		PointOperations.computePerspective(this.pN, this.pV);
 		this.zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
+		
 		ShapeReader sr = new ShapeReader();
 		Shape s = sr.read(this.currentShape);
+		
+		s.convertFromWorldToSight(this.pC);
 		iterateOverTriangles(s);
 	}
 	
@@ -248,16 +271,15 @@ public class OptionsControler implements Initializable{
 		return value;		
 	}
 	
-	public static Array[] applyOrthogonalProjectionToVertexSet(Shape s) {
-		Array values [] = new Array[s.getVerticesW().length];		
-		for(int i = 0; i<s.getVerticesW().length;i++) {
-			values[i] = Projections.orthogonal(s.getVertex(i));
-		}		
-		return values;	
-	}
+//	public static Array[] applyOrthogonalProjectionToVertexSet(Shape s) {
+//		Array values [] = new Array[s.getVerticesW().length];		
+//		for(int i = 0; i<s.getVerticesW().length;i++) {
+//			values[i] = Projections.orthogonal(s.getVertex(i));
+//		}		
+//		return values;	
+//	}
 		
-	public void compute_coordinates_and_draw_pixels_perspective(Shape s,@SuppressWarnings("exports") GraphicsContext gc) {
-		Array verticesSet [] = s.getVerticesW();
+	public void compute_coordinates_and_draw_pixels_perspective(Shape s) {
 		for(int i = 0; i < verticesSet.length;i++) {
 			//projecting vertex
 			Array aux = verticesSet[i];
@@ -265,8 +287,8 @@ public class OptionsControler implements Initializable{
 			aux = Projections.projectPerspective(aux,this.d,this.hx,this.hy).t();
 			double k = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
 			double l = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
-			gc.setFill(Color.WHITE);
-			gc.fillRect(k,l,1,1);
+			this.gc.setFill(Color.WHITE);
+			this.gc.fillRect(k,l,1,1);
 		}		
 	}
 	

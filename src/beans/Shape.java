@@ -1,44 +1,46 @@
 package beans;
 
+import java.util.ArrayList;
+
 public class Shape {
 	
 	private int n_vertices;
 	private int n_triangles;
 	private int control_vertices =0;
 	private int control_triangles=0;
-	private Point verticesW[];//Vertices in world Coordinates	
-	private Point verticesS[];//Vertices in sight Coordinates
+	private ArrayList<Point> verticesW;//Vertices in world Coordinates	
+	private ArrayList<Point> verticesS;//Vertices in sight Coordinates
 	private int triangle_indices[][];
-	private Triangle triangles[];
+	private ArrayList<Triangle> triangles;
 	
 	public Shape(int vertices, int triangles) {
 		this.n_vertices  = vertices;
 		this.n_triangles = triangles;
-		this.verticesW = new Point[vertices];
-		this.verticesS = new Point[vertices];
+		this.verticesW = new ArrayList<Point>();
+		this.verticesS = new ArrayList<Point>();
 		this.triangle_indices = new int[triangles][3];
-		this.triangles = new Triangle [triangles];
+		this.triangles = new ArrayList<Triangle>();
 	}
 	
-	public void addVertex(Array v) {
-		this.verticesW[this.control_vertices++] = new Point(v);		
+	public void addVertex(Array v) {		
+		this.verticesW.add(new Point(v));		
 	}
 	
 	public void addTriangle(int t[]) {
 		Point ps[] = new Point[t.length];
 		for(int i = 0; i < t.length; i++) {
-			ps[i] = this.verticesW[i];
+			ps[i] = this.verticesW.get(i);
 		}		
-		this.triangles[this.control_triangles] = new Triangle(ps[0],ps[1],ps[2]);
+		this.triangles.set(this.control_triangles, new Triangle(ps[0],ps[1],ps[2]));
 		this.triangle_indices[this.control_triangles++]= t;
 	}
 	
 	public Point getVertex(int i) {
-		return this.verticesW[i];		
+		return this.verticesW.get(i);		
 	}
 	
 	public Triangle getTriangle(int i) {
-		return this.triangles[i];		
+		return this.triangles.get(i);		
 	}
 	
 	
@@ -52,12 +54,12 @@ public class Shape {
 	public void convertFromWorldToSight(Point C) {
 		
 		for(int i = 0; i < this.n_vertices;i++) {
-			this.verticesS[i] = PointOperations.applyPerspectiveTransform(this.verticesW[i], C);
+			this.verticesS.set(i,PointOperations.applyPerspectiveTransform(this.verticesW.get(i), C));
 		}
 		Triangle t = null;
 		for(int i =0; i < this.n_triangles;i++) {
 			int t_idx[] = this.triangle_indices[0];
-			t = this.triangles[i];
+			t = this.triangles.get(i);
 			for (int j=0; j < t_idx.length;j++) {
 				t.setPoint(verticesS[t_idx[j]], j);
 			}
