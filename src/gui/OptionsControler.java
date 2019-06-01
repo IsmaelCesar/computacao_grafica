@@ -249,15 +249,15 @@ public class OptionsControler implements Initializable{
 	}
 	
 	public static Array[] applyOrthogonalProjectionToVertexSet(Shape s) {
-		Array values [] = new Array[s.getVertexes().length];		
-		for(int i = 0; i<s.getVertexes().length;i++) {
+		Array values [] = new Array[s.getVerticesW().length];		
+		for(int i = 0; i<s.getVerticesW().length;i++) {
 			values[i] = Projections.orthogonal(s.getVertex(i));
 		}		
 		return values;	
 	}
 		
 	public void compute_coordinates_and_draw_pixels_perspective(Shape s,@SuppressWarnings("exports") GraphicsContext gc) {
-		Array verticesSet [] = s.getVertexes();
+		Array verticesSet [] = s.getVerticesW();
 		for(int i = 0; i < verticesSet.length;i++) {
 			//projecting vertex
 			Array aux = verticesSet[i];

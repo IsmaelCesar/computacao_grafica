@@ -113,7 +113,7 @@ public class Linear {
 	public static double determinant(Array a) {
 		double det = 0;
 		if(a.getRows_dim()== 2 && a.getDim() == 2) {
-			det = (a.getItem(0, 0) + a.getItem(1, 1)) - (a.getItem(0, 1) + a.getItem(1, 0));
+			det = (a.getItem(0, 0) * a.getItem(1, 1)) - (a.getItem(0, 1) * a.getItem(1, 0));
 		}
 		else {
 			Array newA = null;
@@ -164,6 +164,7 @@ public class Linear {
 		return result;		
 	}
 	
+	//fabio
 //	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {
 //		Array result = null;
 //		A = transpose_for_procedure(A);
@@ -182,6 +183,32 @@ public class Linear {
 //				double gamma = 1.0 - alpha - beta;
 //				double psi [][] = {{alpha,beta,gamma}};
 //				result = new Array(psi);				
+//			}
+//		}		
+//		return result;
+//	}
+	
+	//lucas
+//	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {
+//		Array result = null;
+//		A = transpose_for_procedure(A);
+//		B = transpose_for_procedure(B);
+//		C = transpose_for_procedure(C);
+//		P = transpose_for_procedure(P);		
+//		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
+//			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {
+//				Array m1 = new Array(2,2);
+//				m1.setItem(A.getItem(0, 0) - C.getItem(0, 0), 0, 0);
+//				m1.setItem(B.getItem(0, 0) - C.getItem(0, 0), 0, 1);
+//				m1.setItem(A.getItem(0, 1) - C.getItem(0, 1), 1, 0);
+//				m1.setItem(B.getItem(0, 1) - C.getItem(0, 1), 1, 1);
+//				
+//				Array m2 = new Array(2,1);
+//				m2.setItem(P.getItem(0,0) - C.getItem(0, 0), 0, 0);
+//				m2.setItem(P.getItem(0,1) - C.getItem(0, 1), 1, 0);
+//				
+//				double d = Linear.determinant(m1);		
+//				
 //			}
 //		}		
 //		return result;
