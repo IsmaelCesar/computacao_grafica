@@ -36,8 +36,8 @@ public class OptionsControler implements Initializable{
 	double height;
 	
 	ShapeReader sr = new ShapeReader();
-	String selectedShape= objects[0];
-	String tempSelected = objects[0];
+	String selectedShape= objects[2];
+	String tempSelected = objects[2];
 	Array zbuffer;
 	//Variables from FXML
 	@FXML
@@ -420,7 +420,7 @@ public class OptionsControler implements Initializable{
 		double x_p = alpha*tSight[0].getItem(0, 0) + beta*tSight[1].getItem(0, 0) + gamma*tSight[2].getItem(0, 0);
 		double y_p = alpha*tSight[0].getItem(0, 1) + beta*tSight[1].getItem(0, 1) + gamma*tSight[2].getItem(0, 1);
 		double z_p = alpha*tSight[0].getItem(0, 2) + beta*tSight[1].getItem(0, 2) + gamma*tSight[2].getItem(0, 2);
-		double p_sight[][] = {{x_p,y_p,z_p}};
+		double p_sight[][] = {{x_p,y_p,-z_p}};
 		Array P_sight   = new Array(p_sight);
 		
 		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {			
@@ -428,6 +428,7 @@ public class OptionsControler implements Initializable{
 			if(P_sight.getItem(0,2) < value) {
 				//draw point and save the new value
 				this.zbuffer.setItem(P_sight.getItem(0,2),i,j);
+//				this.gc.fillRect(i,j,1,1);
 				this.illuminationAndColloring(P_sight,tSight, baricords, i, j);
 			}
 		}
@@ -456,10 +457,9 @@ public class OptionsControler implements Initializable{
 	}
 	
 	
-	public Array computeSpecularComponent(Array normVector,Array L,Array vision) {			
+	public Array computeSpecularComponent(Array R,Array L,Array vision) {			
 		Array Is = new Array(1,3);		
-		Array aux = Linear.dotScalar(2*Linear.dot(normVector, L.t()).getItem(0, 0),normVector);
-		Array R = Linear.subtraction(aux, L);
+		
 				
 		Array rvAngle = Linear.dot(R,vision.t());
 		if(rvAngle.getItem(0,0) > 0) {
@@ -482,9 +482,14 @@ public class OptionsControler implements Initializable{
 		double originCoords[][] = {{0,0,0}};
 		Array origin = new Array(originCoords);
 		
+		//Computing inportant vectors for Illumination and coloring calculations
 		Array normVector = computePointNormVector(triangle,baricords);
 		Array visionVector = Linear.subtraction(origin, P).normalization();
 		Array L = Linear.subtraction(this.Pl,P).normalization();
+		
+		Array aux = Linear.dotScalar(2*Linear.dot(normVector, L.t()).getItem(0, 0),normVector);
+		Array R = Linear.subtraction(aux, L);
+		
 		
 		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);					
 		Array dotNL = Linear.dot(normVector, L.t());
@@ -501,7 +506,7 @@ public class OptionsControler implements Initializable{
 		}					
 		
 		Id = this.computeDifuseComponent(normVector, dotNL);		
-		Is = this.computeSpecularComponent(normVector, L, visionVector);		
+		Is = this.computeSpecularComponent(R, L, visionVector);		
 		
 		Array Ipoint = Linear.sum(Linear.sum(Ia, Id),Is);
 		//veryfing if any component of the point has a value greater than 255
