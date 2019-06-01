@@ -2,7 +2,7 @@ package beans;
 
 import beans.Linear.Projections;
 
-//Interface between Linear class and point class in order to perform Operations
+//Interface between Linear class and Point class in order to perform Operations
 public class PointOperations {
 	public static Point subtract(Point p1,Point p2) {
 		Point result;		

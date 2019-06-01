@@ -22,7 +22,8 @@ public class Shape {
 		this.triangles = new ArrayList<Triangle>();
 	}
 	
-	public void addVertex(Array v) {		
+	public void addVertex(Array v) {
+		this.control_vertices++;
 		this.verticesW.add(new Point(v));		
 	}
 	
@@ -43,6 +44,17 @@ public class Shape {
 		return this.triangles.get(i);		
 	}
 	
+	public ArrayList<Point> getVerticesSight(){
+		return this.verticesS;
+	}
+	
+	public ArrayList<Point> getVerticesWorld(){
+		return this.verticesS;
+	}
+	
+	public ArrayList<Triangle> getTriangles(){
+		return this.triangles;
+	}
 	
 	/**
 	 * Converts all the points of the shape from world coordinates to
@@ -61,10 +73,17 @@ public class Shape {
 			int t_idx[] = this.triangle_indices[0];
 			t = this.triangles.get(i);
 			for (int j=0; j < t_idx.length;j++) {
-				t.setPoint(verticesS[t_idx[j]], j);
+				t.setPoint(verticesS.get(t_idx[j]), j);
 			}
+			this.triangles.set(i, t);
+			this.triangles.get(i).calculateNormal();
+		}		
+	}
+	
+	public void calculateTrianglesBarycenter() {
+		for(int i= 0; i < this.n_triangles;i++) {
+			this.triangles.get(i).calculateBarycenter();
 		}
-		
 	}
 	
 	

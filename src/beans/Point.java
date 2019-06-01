@@ -10,7 +10,11 @@ public class Point {
 	}
 	
 	public Point(double d[][]){
-		this.p = new Array(d);
+		if(d.length  == 1) 
+			this.p = new Array(d);
+		else
+			throw new IllegalArgumentException("A point must be a 1xN Double Array");
+			
 	}
 	
 	public Point(Array a) {
@@ -49,14 +53,14 @@ public class Point {
 	
 	public boolean equals(Point p) {
 		boolean result = false;
-		
-		for(int i = 0; i < 3; i++) {
-			if(p.get(i) == this.get(i)) 
-				result = true;
-			else
-				result = false;
+		if(p.getArray().getDim() == this.p.getDim()) {
+			for(int i = 0; i < 3; i++) {
+				if(p.get(i) == this.get(i)) 
+					result = true;
+				else
+					result = false;
+			}
 		}
-		
 		return result;
 	}
 

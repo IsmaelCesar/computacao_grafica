@@ -1,5 +1,8 @@
 package gui;
 import beans.Array;
+import beans.Point;
+import beans.PointOperations;
+import beans.Triangle;
 import beans.Linear;
 //import beans.Linear.Projections;
 
@@ -80,21 +83,21 @@ public class Questionary {
 	}
 	
 	public static void main(String []args) {
-		double c[][] ={{1,1,2}};
-		Array C = new Array(c);
-		
-		double v[][] = {{0,0,1}};
-		Array V = new Array(v);
-		
 		double n[][] = {{-1,-1,-1}};
-		Array N = new Array(n);
+		Point  N = new Point(n);
+		double v[][] = {{0,0,1}};
+		Point V = new Point(v);
+		double c[][] = {{1,1,2}};
+		Point C = new Point(c);
+		
+		PointOperations.computePerspective(N, V);
 		
 		double p[][] = {{1,-3,-5}};
-		Array P = new Array(p);
+		Point P = new Point(p);
 		
-		Linear.Projections.computePerspectiveMatrix(N, V);
-		Array r = Linear.Projections.applyPerspectiveTransformation(P, C);
-		System.out.println(r);
+		P = PointOperations.applyPerspectiveTransform(P, C);
+		
+		System.out.println(P);
 		
 	}
 }

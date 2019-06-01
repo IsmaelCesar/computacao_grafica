@@ -9,9 +9,11 @@ import beans.Array;
 import beans.Linear;
 import beans.Shape;
 import beans.Point;
+import beans.Triangle;
 import beans.ShapeReader;
 import beans.PointOperations;
 import beans.Linear.Projections;
+
 import javafx.fxml.Initializable;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -279,36 +281,37 @@ public class OptionsControler implements Initializable{
 //		return values;	
 //	}
 		
-	public void compute_coordinates_and_draw_pixels_perspective(Shape s) {
-		for(int i = 0; i < verticesSet.length;i++) {
-			//projecting vertex
-			Array aux = verticesSet[i];
-			aux = Projections.applyPerspectiveTransformation(aux, this.C).t();
-			aux = Projections.projectPerspective(aux,this.d,this.hx,this.hy).t();
-			double k = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
-			double l = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
-			this.gc.setFill(Color.WHITE);
-			this.gc.fillRect(k,l,1,1);
-		}		
-	}
+//	public void compute_coordinates_and_draw_pixels_perspective(Shape s) {
+//		for(int i = 0; i < verticesSet.length;i++) {
+//			//projecting vertex
+//			Array aux = verticesSet[i];
+//			aux = Projections.applyPerspectiveTransformation(aux, this.C).t();
+//			aux = Projections.projectPerspective(aux,this.d,this.hx,this.hy).t();
+//			double k = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
+//			double l = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
+//			this.gc.setFill(Color.WHITE);
+//			this.gc.fillRect(k,l,1,1);
+//		}		
+//	}
 	
 	//Rasterize
 	public void iterateOverTriangles(Shape s) {
-		gc.setFill(Color.WHITE);
-		int numTriangles= s.getTriangles().length;
+		this.gc.setFill(Color.WHITE);
+		ArrayList<Triangle> t = this.sortTrianglesByBarycenter(s.getTriangles());
+		int numTriangles= t.size();
 		for(int i = 0; i<numTriangles ;i++) {
-	        int triangleIndices []= s.getTriangleIndexes(i);
-			//Get all vertices
-			Array vertices [] = new Array [3];
-			for(int k = 0;k < vertices.length;k++) {
-				vertices[k] = s.getVertex(triangleIndices[k]-1); 
-			}
-			rasterizeTriangle(vertices);			
+//	        int triangleIndices []= s.getTriangleIndexes(i);
+//			//Get all vertices
+//			Array vertices [] = new Array [3];
+//			for(int k = 0;k < vertices.length;k++) {
+//				vertices[k] = s.getVertex(triangleIndices[k]-1); 
+//			}
+//			rasterizeTriangle(vertices);			
 		}		
 	}
 	
 	/**
-	 * @param triangle - Triangle in world coordinates
+	 * @param triangle - Triangle in sight coordinates
 	 */
 	public void rasterizeTriangle(Array triangle[]) {
 		//Projecting vertices and getting screen coordinates
@@ -599,6 +602,20 @@ public class OptionsControler implements Initializable{
 			}				
 		}
 		return scalar;	
+	}
+	
+	public ArrayList<Triangle> sortTrianglesByBarycenter(ArrayList<Triangle> t){
+		
+		for(int i =1;i < t.size(); i++) {
+			int j = i-1;
+			Triangle el = t.get(i);
+			while(j >=0  && el.getBarycenter().get(2) < t.get(j).getBarycenter().get(2)) {
+				t.set(j+1, t.get(j));
+				j--;
+			}
+			t.set(j+1, el);
+		}
+		return t;		
 	}
 	
 }
