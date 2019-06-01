@@ -49,11 +49,10 @@ public class Shape {
 	 * 
 	 * @param C the position of the camera in world coordinates
 	 */
-	public void convertFromWorldToSight(Array C) {
+	public void convertFromWorldToSight(Point C) {
 		
 		for(int i = 0; i < this.n_vertices;i++) {
-			Array a = Linear.Projections.applyPerspectiveTransformation(this.verticesW[i].getArray(), C).t();
-			this.verticesS[i] = new Point(a);
+			this.verticesS[i] = PointOperations.applyPerspectiveTransform(this.verticesW[i], C);
 		}
 		Triangle t = null;
 		for(int i =0; i < this.n_triangles;i++) {
