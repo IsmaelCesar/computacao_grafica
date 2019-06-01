@@ -80,7 +80,9 @@ public class Questionary {
 	}
 	
 	public static void main(String []args) {
-		questao1_letraG();
-		
+		double a[][] ={{3.5,1.5,2.0}};
+		Array A = new Array(a);
+		System.out.println(A.norm());
+		System.out.println(A.normalization());
 	}
 }

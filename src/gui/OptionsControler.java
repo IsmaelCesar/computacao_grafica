@@ -124,9 +124,9 @@ public class OptionsControler implements Initializable{
 		gc = canvas.getGraphicsContext2D();			
 		this.width = canvas.getWidth();
 		this.height= canvas.getHeight();	
-		this.zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
+		this.zbuffer = new Array(initializeZbufferMatrix((int)this.width,(int)this.height));
 		this.gc.setFill(Color.BLACK);
-		this.gc.fillRect(0, 0, width, height);
+		this.gc.fillRect(0, 0, width, this.height);
 		this.initializeCameraParameters();		
 		this.drawDefaultShape();
 	}
@@ -180,9 +180,8 @@ public class OptionsControler implements Initializable{
 	}
 	
 	public void drawDefaultShape() {
-		this.selectedShape = objects[0];
 		Shape s = sr.read(this.selectedShape);
-		iterateOverTriangles(s,gc);
+		iterateOverTriangles(s);
 	}
 	
 	private void initializeMenuButton() {
@@ -205,7 +204,7 @@ public class OptionsControler implements Initializable{
 		gc.fillRect(0,0, this.width,this.height);
 		zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		Shape s = sr.read(shapeSelected);
-		iterateOverTriangles(s,gc);
+		iterateOverTriangles(s);
 		this.currentShape = shapeSelected;
 	}
 	
@@ -223,7 +222,7 @@ public class OptionsControler implements Initializable{
 		this.zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		ShapeReader sr = new ShapeReader();
 		Shape s = sr.read(this.currentShape);
-		iterateOverTriangles(s,gc);
+		iterateOverTriangles(s);
 	}
 	
 	
@@ -256,28 +255,7 @@ public class OptionsControler implements Initializable{
 		}		
 		return values;	
 	}
-	
-	@SuppressWarnings("exports")
-	public void compute_coordinates_and_draw_pixels_orthogonal(Shape s,GraphicsContext gc) {
-		Array shapeVertices [] = applyOrthogonalProjectionToVertexSet(s);
-		double x_max = getDimentionMaxValue(shapeVertices,0);
-		double x_min = getDimentionMinValue(shapeVertices,0);
 		
-		double y_max = getDimentionMaxValue(shapeVertices,1);
-		double y_min = getDimentionMinValue(shapeVertices,1);
-		for(int i = 0; i < shapeVertices.length;i++) {
-			
-			//normalization
-			double x = shapeVertices[i].getItem(0,0);
-			double y = shapeVertices[i].getItem(0,1);
-			
-			x = (x-x_min)/(x_max-x_min)*(width-1);
-			y = (y-y_min)/(y_max-y_min)*(height-1);
-			gc.setFill(Color.WHITE);
-			gc.fillRect(x,y, 1,1);			
-		}		
-	}
-	
 	public void compute_coordinates_and_draw_pixels_perspective(Shape s,@SuppressWarnings("exports") GraphicsContext gc) {
 		Array verticesSet [] = s.getVertexes();
 		for(int i = 0; i < verticesSet.length;i++) {
@@ -293,7 +271,7 @@ public class OptionsControler implements Initializable{
 	}
 	
 	//Rasterize
-	public void iterateOverTriangles(Shape s, @SuppressWarnings("exports") GraphicsContext gc) {
+	public void iterateOverTriangles(Shape s) {
 		gc.setFill(Color.WHITE);
 		int numTriangles= s.getTriangles().length;
 		for(int i = 0; i<numTriangles ;i++) {
@@ -303,15 +281,14 @@ public class OptionsControler implements Initializable{
 			for(int k = 0;k < vertices.length;k++) {
 				vertices[k] = s.getVertex(triangleIndices[k]-1); 
 			}
-			rasterizeTriangle(vertices,gc);			
+			rasterizeTriangle(vertices);			
 		}		
 	}
 	
 	/**
 	 * @param triangle - Triangle in world coordinates
-	 * @param gc       - Graphics context of canvas of JavaFX object
 	 */
-	public void rasterizeTriangle(Array triangle[],@SuppressWarnings("exports") GraphicsContext gc) {
+	public void rasterizeTriangle(Array triangle[]) {
 		//Projecting vertices and getting screen coordinates
 		Array aux = null;
 		double screenCoordinates [][] = new double [3][2];
@@ -448,7 +425,7 @@ public class OptionsControler implements Initializable{
 		
 		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {			
 			double value = this.zbuffer.getItem(i,j); 
-			if(P_sight.getItem(0,2) <= value) {
+			if(P_sight.getItem(0,2) < value) {
 				//draw point and save the new value
 				this.zbuffer.setItem(P_sight.getItem(0,2),i,j);
 				this.illuminationAndColloring(P_sight,tSight, baricords, i, j);
@@ -466,7 +443,7 @@ public class OptionsControler implements Initializable{
 	
 			Array v1 = Linear.subtraction(triangle[1], triangle[0]);
 			Array v2 = Linear.subtraction(triangle[2], triangle[0]);		
-			Array normVector = Linear.cross(v1, v2);			
+			Array normVector = Linear.cross(v1, v2);					
 			return normVector.normalization();
 	}
 	
@@ -501,17 +478,18 @@ public class OptionsControler implements Initializable{
 	 * @param j - y position of the pixel on the screen
 	 */
 	public void illuminationAndColloring(Array P,Array triangle[],Array baricords,int i,int j) {
+		//defining origin
+		double originCoords[][] = {{0,0,0}};
+		Array origin = new Array(originCoords);
 		
-		Array normVector = computePointNormVector(triangle,baricords);		
-		Array vision = Linear.dotScalar(-1, P).normalization();
-		
-		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);	
-		
+		Array normVector = computePointNormVector(triangle,baricords);
+		Array visionVector = Linear.subtraction(origin, P).normalization();
 		Array L = Linear.subtraction(this.Pl,P).normalization();
-				
+		
+		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);					
 		Array dotNL = Linear.dot(normVector, L.t());
 			
-		//Computing the difuse component Of light
+		//Defining the difuse component Of light
 		Array Id = new Array(1,3);
 		Array Is = new Array(1,3);
 		
@@ -523,7 +501,7 @@ public class OptionsControler implements Initializable{
 		}					
 		
 		Id = this.computeDifuseComponent(normVector, dotNL);		
-		Is = this.computeSpecularComponent(normVector, L, vision);		
+		Is = this.computeSpecularComponent(normVector, L, visionVector);		
 		
 		Array Ipoint = Linear.sum(Linear.sum(Ia, Id),Is);
 		//veryfing if any component of the point has a value greater than 255
