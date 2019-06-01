@@ -36,8 +36,10 @@ public class OptionsControler implements Initializable{
 	double height;
 	
 	ShapeReader sr = new ShapeReader();
-	String selectedShape= objects[2];
-	String tempSelected = objects[2];
+	String selectedShape= objects[3];
+	String tempSelected = objects[3];
+	//Current Shape
+	String currentShape = objects[3];
 	Array zbuffer;
 	//Variables from FXML
 	@FXML
@@ -114,8 +116,6 @@ public class OptionsControler implements Initializable{
 	double Ks;
 	double Ka;
 	double Eta;
-	//Current Shape
-	String currentShape = "calice2.byu";
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -428,9 +428,9 @@ public class OptionsControler implements Initializable{
 			if(P_sight.getItem(0,2) < value) {
 				//draw point and save the new value
 				this.zbuffer.setItem(P_sight.getItem(0,2),i,j);
-//				this.gc.fillRect(i,j,1,1);
 				this.illuminationAndColloring(P_sight,tSight, baricords, i, j);
 			}
+			
 		}
 	}
 	
