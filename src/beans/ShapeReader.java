@@ -79,7 +79,7 @@ public class ShapeReader {
 							}
 						}
 						double coordinates[][]= {{x,y,z}};
-						mShape.addVertexW(new Array(coordinates));
+						mShape.addVertex(new Array(coordinates));
 						
 						values = br.readLine();
 						if(values != null)

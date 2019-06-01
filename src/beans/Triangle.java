@@ -15,6 +15,10 @@ public class Triangle {
 		this.points.add(p3);
 	}
 
+	public void setPoint(Point p,int i) {
+		this.points.set(i, p);
+	}
+	
 	public Point getPoint(int i) {
 		return this.points.get(i);
 	}
@@ -28,6 +32,13 @@ public class Triangle {
 	
 	public Array getNormal() {
 		return this.normal;
+	}
+	
+	public void calculateNormal() {
+		Array v1 = Linear.subtraction(this.points.get(1).getArray(), this.points.get(0).getArray());
+		Array v2 = Linear.subtraction(this.points.get(2).getArray(), this.points.get(0).getArray());
+		Array result = Linear.cross(v1, v2);
+		this.setNormal(result.normalization());
 	}
 	
 }

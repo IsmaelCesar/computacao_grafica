@@ -33,11 +33,14 @@ public class Point {
 			this.normal = normal;
 		else
 			throw new IllegalArgumentException("the normal must be a 1xN Array");
-	
 	}
 	
 	public Array getNormal() {
 		return this.normal;
+	}
+	
+	public Array getArray() {
+		return this.p;
 	}
 	
 	public String toString() {
