@@ -26,6 +26,12 @@ public class PointOperations {
 	}
 	
 	
+	public static Point calculateBarycenter(Point P, Point p1, Point p2, Point p3) {
+		Array b = Linear.getBarycentricCoordinates(P.getArray(), p1.getArray(), p2.getArray(), p3.getArray());
+		Point baricords = new Point(b);
+		return baricords;
+	}
+	
 	//Projections
 	public static void computePerspective(Point pN,Point pV) {
 		Projections.computePerspectiveMatrix(pN.getArray(),pV.getArray());
@@ -36,6 +42,12 @@ public class PointOperations {
 		Array r = Linear.Projections.applyPerspectiveTransformation(p1.getArray(), C.getArray()).t();
 		result  = new Point(r);		
 		return result;
+	}
+	
+	public static Point projectPerspective(Point p, double d, double hx, double hy) {
+		Array result = Linear.Projections.projectPerspective(p.getArray(), d, hx, hy);
+		Point projectedPoint = new Point(result);
+		return projectedPoint;
 	}
 	
 		

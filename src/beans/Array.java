@@ -13,11 +13,6 @@ public class Array {
 		this.values = new double [rows_dim][dim];
 	}
 	
-	public Array(int dim) {
-		this.values = new double [rows_dim][dim];
-		this.dim = dim;
-	}
-	
 	public Array(int n_rows,int dim){
 		this.values = new double [n_rows][dim];
 		this.dim = dim;

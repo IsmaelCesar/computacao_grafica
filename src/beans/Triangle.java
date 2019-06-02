@@ -36,6 +36,10 @@ public class Triangle {
 		return this.barycenter;
 	}
 	
+	public ArrayList<Point> getPoints(){
+		return this.points;
+	}
+	
 	//Calculate all the coordinates of the barycenter of the triangle
 	public Point calculateBarycenter() {
 		double d [][] = new double[1][3];

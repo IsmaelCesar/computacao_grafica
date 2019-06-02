@@ -229,13 +229,13 @@ public class OptionsControler implements Initializable{
 		this.gc.fillRect(0,0,this.width,this.height);
 		
 		this.N  = this.createArrayFromTextFieldValues(this.txtFieldN,this.N);
-		this.pN = new Point(N);
+		this.pN = new Point(this.N);
 		
 		this.V  = this.createArrayFromTextFieldValues(this.txtFieldV,this.V);
-		this.pV = new Point(V);
+		this.pV = new Point(this.V);
 		
 		this.C  = this.createArrayFromTextFieldValues(this.txtFieldC,this.C);
-		this.pC = new Point(C);
+		this.pC = new Point(this.C);
 		
 		this.hx = this.readScalarsFromTextField(this.txtFieldHX);
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
@@ -294,131 +294,143 @@ public class OptionsControler implements Initializable{
 //		}		
 //	}
 	
+	
+	/**
+	 * Iterates over all vertices in the triangle an sets the norm
+	 * of each point with summation of the norms of the triangle 
+	 * containing the point 
+	 *  
+	 * @param t  - list if all triangles of the shape
+	 * @param singleT - the triangle currently being verified 
+	 */
+	public void calculatePointwiseNormal(ArrayList<Triangle> t,Triangle singleT) {
+		Array normal = new Array(1,3);
+		for(Point p : singleT.getPoints()) {
+			for(Triangle mT : t) {
+				if(mT.containsPoint(p)) {
+					normal = Linear.sum(normal, mT.getNormal());
+				}
+			}
+			p.setNormal(normal.normalization());
+		}
+		
+	}
+
 	//Rasterize
 	public void iterateOverTriangles(Shape s) {
 		this.gc.setFill(Color.WHITE);
-		ArrayList<Triangle> t = this.sortTrianglesByBarycenter(s.getTriangles());
-		int numTriangles= t.size();
-		for(int i = 0; i<numTriangles ;i++) {
-//	        int triangleIndices []= s.getTriangleIndexes(i);
-//			//Get all vertices
-//			Array vertices [] = new Array [3];
-//			for(int k = 0;k < vertices.length;k++) {
-//				vertices[k] = s.getVertex(triangleIndices[k]-1); 
-//			}
-//			rasterizeTriangle(vertices);			
+		ArrayList<Triangle> sortedTs = this.sortTrianglesByBarycenter(s.getTriangles());		
+		int numTriangles= sortedTs.size();
+		for(int i = 0; i<numTriangles ;i++) {			
+			calculatePointwiseNormal(sortedTs,sortedTs.get(i));
+			rasterizeTriangle(sortedTs.get(i));			
 		}		
 	}
 	
 	/**
 	 * @param triangle - Triangle in sight coordinates
 	 */
-	public void rasterizeTriangle(Array triangle[]) {
+	public void rasterizeTriangle(Triangle triangle) {
 		//Projecting vertices and getting screen coordinates
 		Array aux = null;
-		double screenCoordinates [][] = new double [3][2];
-		double sightCoordinates[][] = new double [3][3];
-		for(int k =0;k < triangle.length; k++) {
-			aux = Projections.applyPerspectiveTransformation(triangle[k], this.C).t();
-			
-			sightCoordinates[k][0] = aux.getItem(0, 0);
-			sightCoordinates[k][1] = aux.getItem(0, 1);
-			sightCoordinates[k][2] = aux.getItem(0, 2);
-			
-			aux = Projections.projectPerspective(aux, this.d, this.hx, this.hx).t();
-			screenCoordinates[k][0] = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
-			screenCoordinates[k][1] = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
-			
+		
+		
+		ArrayList<Point> pointsScreen = new ArrayList<Point>();
+		double screenCoordinates [][][] = new double[3][1][2];
+		for(int k =0; k < triangle.getPoints().size(); k++) {
+			Point proj  = PointOperations.projectPerspective(triangle.getPoint(k), this.d, this.hx, this.hy);
+			screenCoordinates[k][0][0] =  Math.floor(((proj.get(0)+1)/2)*(this.width)+0.5);
+			screenCoordinates[k][0][1] = Math.floor(this.height - ((proj.get(1)+1)/2)*(this.height) + 0.5);
+			pointsScreen.add(new Point(screenCoordinates[k]));
 		}
+		
+		
 		// RASTERIZE TRIANGLES
 		//sort triangles by height
-		for(int k =1;k < screenCoordinates.length; k++) {
+		for(int k =1;k < pointsScreen.size(); k++) {
 			int j = k-1;
-			double el[] = screenCoordinates[k];
-			double el2[] = sightCoordinates[k];
-			while(j >=0  && el[1] < screenCoordinates[j][1]) {				
-				screenCoordinates[j+1] = screenCoordinates[j];
-				sightCoordinates[j+1]  = sightCoordinates[j];
+			Point el = pointsScreen.get(k);
+			while(j >=0  && el.get(1) < pointsScreen.get(j).get(1)) {				
+				pointsScreen.set(j+1,pointsScreen.get(j));
 				j--;
 			}			
-			screenCoordinates[j+1] = el;
-			sightCoordinates[j+1]  = el2;
+			pointsScreen.set(j+1, el);
 		}
 		
 		//calculate division point
-		double division [] = calculateTriangleDivisionPoint(screenCoordinates);		
+		Point division  = calculateTriangleDivisionPoint(pointsScreen);		
 		boolean isSwaped = false;
-		if(screenCoordinates[1][0] > division[0]) {
-			double swap[] = screenCoordinates[1];
-			screenCoordinates[1] = division;
+		if(pointsScreen.get(1).get(0) > division.get(0)) {
+			Point swap = pointsScreen.get(1);
+			pointsScreen.set(1, division);
 			division = swap;
 			isSwaped = true;
 		}
 		
 		//rasterizing first half of the triangle
 		double epsilon = 0.000000000001;
-		double a1 = ((screenCoordinates[1][1] - screenCoordinates[0][1])/
-				    (screenCoordinates[1][0] - screenCoordinates[0][0]+epsilon));			
+		double a1 = ((pointsScreen.get(1).get(1) - pointsScreen.get(0).get(1))/
+				    (pointsScreen.get(1).get(0) - pointsScreen.get(0).get(0)+epsilon));			
 
-		double a2 = ((division[1] - screenCoordinates[0][1])/
-			    	 (division[0] - screenCoordinates[0][0]+epsilon));
+		double a2 = ((division.get(1) - pointsScreen.get(0).get(1))/
+			    	 (division.get(0) - pointsScreen.get(0).get(0)+epsilon));
 		
 		
-		double  xmin  = screenCoordinates[0][0];
-		double  xmax  = screenCoordinates[0][0];
+		double  xmin  = pointsScreen.get(0).get(0);
+		double  xmax  = pointsScreen.get(0).get(0);
 		
 		//Creating array objects from points
-		double a[][] = {screenCoordinates[0]};
+		Point a = pointsScreen.get(0);
 		//Setting an auxiliary variable for the third point of the triangle before taking the 
 		//division point
-		double b_bar[][] = {screenCoordinates[1]}; //Gambiarra - DON'T TOUCH IT!
+		Point b_bar = pointsScreen.get(1); //Gambiarra - DON'T TOUCH IT!
 		
-		double b[][] = new double[1][2];
+		Point b = new Point(new Array(1,3));
 		if(isSwaped) {
-			b[0] = division;
+			b = division;
 		}	
 		else { 
-			b[0] = screenCoordinates[1];
+			b = pointsScreen.get(1);
 		}
-		double c[][] = {screenCoordinates[2]};
+//		double c[][] = {screenCoordinates[2]};
+//		
+//		double a_sight [][] = {sightCoordinates[0]};
+//		double b_sight [][] = {sightCoordinates[1]};
+//		double c_sight [][] = {sightCoordinates[2]};
+//		
+//		Array triangleScreenCoords[] = {new Array(a),new Array(b_bar),new Array(c)};
+//		Array triangleSightCoords[]  = {new Array(a_sight),new Array(b_sight),new Array(c_sight),};
 		
-		double a_sight [][] = {sightCoordinates[0]};
-		double b_sight [][] = {sightCoordinates[1]};
-		double c_sight [][] = {sightCoordinates[2]};
 		
-		Array triangleScreenCoords[] = {new Array(a),new Array(b_bar),new Array(c)};
-		Array triangleSightCoords[]  = {new Array(a_sight),new Array(b_sight),new Array(c_sight),};
-		
-		
-		for(int yscan=(int)screenCoordinates[0][1]; yscan<= screenCoordinates[1][1];yscan++) {			
+		for(int yscan=(int)pointsScreen.get(0).get(1); yscan<= pointsScreen.get(1).get(1);yscan++) {			
 			int min = (int)Math.floor(xmin+0.5);
 			int max = (int)Math.floor(xmax+0.5);
 			for(int j = min; j <= max; j++ ) {
 				
 				double p[][] = {{(double)j,(double)yscan}};
-				Array P = new Array(p);
-				this.zbuffering(P,triangleScreenCoords,triangleSightCoords,j,yscan);
+				Point P = new Point(new Array(p));
+				this.zbuffering(P,pointsScreen,triangle,j,yscan);
 			}
 			xmin += 1/(a1+epsilon);
 			xmax += 1/(a2+epsilon);
 		}
 		
 		//rasterizing second half of the triangle
-		a1 = ((screenCoordinates[2][1] - screenCoordinates[1][1])/
-			  (screenCoordinates[2][0] - screenCoordinates[1][0]+epsilon));
+		a1 = ((pointsScreen.get(2).get(1) - pointsScreen.get(1).get(1))/
+			  (pointsScreen.get(2).get(0) - pointsScreen.get(1).get(0)+epsilon));
 	
-		a2 = ((screenCoordinates[2][1] - division[1])/
-		      (screenCoordinates[2][0] - division[0]+epsilon));
+		a2 = ((pointsScreen.get(2).get(1) - division.get(1))/
+		      (pointsScreen.get(2).get(0) - division.get(0)+epsilon));
 		
-		xmin = screenCoordinates[2][0];
-		xmax = screenCoordinates[2][0];
-		for(int yscan=(int)screenCoordinates[2][1]; yscan>= (int)screenCoordinates[1][1];yscan--) {			
+		xmin = pointsScreen.get(2).get(0);
+		xmax = pointsScreen.get(2).get(0);
+		for(int yscan=(int)pointsScreen.get(2).get(1); yscan>= (int)pointsScreen.get(1).get(1);yscan--) {			
 			int min = (int)Math.floor(xmin+0.5);
 			int max = (int)Math.floor(xmax+0.5);
 			for(int j = min; j <= max; j++ ) {				
 				double p[][] = {{(double)j,(double)yscan}};
-				Array P = new Array(p);
-				this.zbuffering(P,triangleScreenCoords,triangleSightCoords,j,yscan);
+				Point P = new Point(new Array(p));
+				this.zbuffering(P,pointsScreen,triangle,j,yscan);
 			}			
 			xmin -= 1/(a1+epsilon);
 			xmax -= 1/(a2+epsilon);
@@ -432,19 +444,19 @@ public class OptionsControler implements Initializable{
 	 * @param i  - x position of the pixel on the screen
 	 * @param j  - y position of the pixel on the screen
 	 */
-	public void zbuffering(Array P,Array tScreen[],Array tSight[],int i,int j) {
+	public void zbuffering(Point P,ArrayList<Point> tScreen,Triangle tSight,int i,int j) {
 		//The i and j represent the screen coordinates
 		//It recieves 3 arrays in order to calculat the baricentric coordinates
-		Array baricords = Linear.getBarycentricCoordinates(P, tScreen[0],tScreen[1], tScreen[2]);
+		Point baricords = PointOperations.calculateBarycenter(P, tScreen.get(0),tScreen.get(1), tScreen.get(2));
 		
 		//Getting sight coordinates for p
-		double alpha = baricords.getItem(0, 0);
-		double beta  = baricords.getItem(0, 1);
-		double gamma = baricords.getItem(0, 2);
+		double alpha = baricords.get(0);
+		double beta  = baricords.get(1);
+		double gamma = baricords.get(2);
 		
-		double x_p = alpha*tSight[0].getItem(0, 0) + beta*tSight[1].getItem(0, 0) + gamma*tSight[2].getItem(0, 0);
-		double y_p = alpha*tSight[0].getItem(0, 1) + beta*tSight[1].getItem(0, 1) + gamma*tSight[2].getItem(0, 1);
-		double z_p = alpha*tSight[0].getItem(0, 2) + beta*tSight[1].getItem(0, 2) + gamma*tSight[2].getItem(0, 2);
+		double x_p = alpha*tSight.getPoint(0).get(0) + beta*tSight.getPoint(1).get(0) + gamma*tSight.getPoint(2).get(0);
+		double y_p = alpha*tSight.getPoint(0).get(1) + beta*tSight.getPoint(1).get(1) + gamma*tSight.getPoint(2).get(1);
+		double z_p = alpha*tSight.getPoint(0).get(2) + beta*tSight.getPoint(1).get(2) + gamma*tSight.getPoint(2).get(2);
 		double p_sight[][] = {{x_p,y_p,-z_p}};
 		Array P_sight   = new Array(p_sight);
 		
@@ -551,16 +563,17 @@ public class OptionsControler implements Initializable{
 	
 	//Utils
 	/**
-	 * @param d  - Coordinats  of the triangle 
+	 * @param d  - Screen Coordinates of the points of the triangle 
 	 * @return   coordinates of the division point of the triangle
 	 */
-	public double[] calculateTriangleDivisionPoint(double d[][]) {
-		double deltaMiddle = d[1][1] - d[0][1];
-		double deltaBottom = d[2][1] - d[0][1];
-		double deltaXBottom = d[2][0] - d[0][0];
-		double xTop = d[0][0];
-		double value[] = {xTop + (deltaMiddle/deltaBottom)*deltaXBottom,d[1][1]};
-		return value;		
+	public Point calculateTriangleDivisionPoint(ArrayList<Point> d) {
+		double deltaMiddle = d.get(1).get(1) - d.get(0).get(1);
+		double deltaBottom = d.get(2).get(1) - d.get(0).get(1);
+		double deltaXBottom = d.get(2).get(0) - d.get(0).get(0);
+		double xTop = d.get(0).get(0);
+		double value[][] = {{xTop + (deltaMiddle/deltaBottom)*deltaXBottom,d.get(1).get(1)}};
+		Point p = new Point(new Array(value));
+		return p;		
 	}
 	
 	public Array createArrayFromTextFieldValues(@SuppressWarnings("exports") TextField tField,Array A) {
