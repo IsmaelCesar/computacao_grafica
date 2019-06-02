@@ -66,9 +66,22 @@ public class Triangle {
 				result = true;
 				break;
 			}
-		}
-		
+		}		
 		return result;
 	}
+	
+	public String toString() {
+		String value = "<";
+		for(int i = 0; i<this.points.size();i++) {
+			if(i == this.points.size()-1)
+				value += this.points.get(i).toString()+"\n";
+			else
+				value += this.points.get(i).toString()+",";
+			
+		}
+		value += ">";
+		return value;			
+	}
+	
 	
 }

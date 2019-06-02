@@ -12,7 +12,6 @@ import beans.Point;
 import beans.Triangle;
 import beans.ShapeReader;
 import beans.PointOperations;
-import beans.Linear.Projections;
 
 import javafx.fxml.Initializable;
 import javafx.event.ActionEvent;
@@ -40,10 +39,11 @@ public class OptionsControler implements Initializable{
 	double height;
 	
 	ShapeReader sr = new ShapeReader();
-	String selectedShape= objects[3];
-	String tempSelected = objects[3];
+	private int selectedObj = 5;
+	String selectedShape= objects[this.selectedObj];
+	String tempSelected = objects[this.selectedObj];
 	//Current Shape
-	String currentShape = objects[3];
+	String currentShape = objects[this.selectedObj];
 	Array zbuffer;
 	//Variables from FXML
 	@FXML
@@ -115,11 +115,20 @@ public class OptionsControler implements Initializable{
 	double d;
 	
 	//Illumination and coloring
-	Array Iamb = new Array(1,3);
-	Array Il = new Array(1,3);
-	Array Od = new Array(1,3);
-	Array Pl = new Array(1,3);
-	Array Kd = new Array(1,3);
+	Array aIamb = new Array(1,3);
+	Point Iamb = new Point(aIamb);
+	
+	Array aIl = new Array(1,3);
+	Point Il = new Point(aIl);
+	
+	Array aOd = new Array(1,3);
+	Point Od  = new Point(aOd);
+	
+	Array aPl = new Array(1,3);
+	Point Pl  = new Point(aPl);
+	
+	Array aKd = new Array(1,3);
+	Point Kd  = new Point(aKd);
 	
 	double Ks;
 	double Ka;
@@ -183,11 +192,11 @@ public class OptionsControler implements Initializable{
 		this.txtFieldKs.setText("0.5");
 		this.txtFieldEta.setText("1");
 		
-		this.Iamb = this.createArrayFromTextFieldValues(txtFieldIamb, Iamb);
-		this.Il  = this.createArrayFromTextFieldValues(txtFieldIl, Il);
-		this.Pl  = this.createArrayFromTextFieldValues(txtFieldPl, Pl);
-		this.Kd  = this.createArrayFromTextFieldValues(txtFieldKd, Kd);
-		this.Od  = this.createArrayFromTextFieldValues(txtFieldKd, Od);
+		this.Iamb = new Point(this.createArrayFromTextFieldValues(txtFieldIamb, aIamb));
+		this.Il  = new Point(this.createArrayFromTextFieldValues(txtFieldIl, aIl));
+		this.Pl  = new Point(this.createArrayFromTextFieldValues(txtFieldPl, aPl));
+		this.Kd  = new Point(this.createArrayFromTextFieldValues(txtFieldKd, aKd));
+		this.Od  = new Point(this.createArrayFromTextFieldValues(txtFieldKd, aOd));
 		this.Ka  = this.readScalarsFromTextField(this.txtFieldKa);
 		this.Ks  = this.readScalarsFromTextField(this.txtFieldKs);
 		this.Eta  = this.readScalarsFromTextField(this.txtFieldEta);
@@ -332,9 +341,6 @@ public class OptionsControler implements Initializable{
 	 */
 	public void rasterizeTriangle(Triangle triangle) {
 		//Projecting vertices and getting screen coordinates
-		Array aux = null;
-		
-		
 		ArrayList<Point> pointsScreen = new ArrayList<Point>();
 		double screenCoordinates [][][] = new double[3][1][2];
 		for(int k =0; k < triangle.getPoints().size(); k++) {
@@ -343,7 +349,6 @@ public class OptionsControler implements Initializable{
 			screenCoordinates[k][0][1] = Math.floor(this.height - ((proj.get(1)+1)/2)*(this.height) + 0.5);
 			pointsScreen.add(new Point(screenCoordinates[k]));
 		}
-		
 		
 		// RASTERIZE TRIANGLES
 		//sort triangles by height
@@ -457,15 +462,15 @@ public class OptionsControler implements Initializable{
 		double x_p = alpha*tSight.getPoint(0).get(0) + beta*tSight.getPoint(1).get(0) + gamma*tSight.getPoint(2).get(0);
 		double y_p = alpha*tSight.getPoint(0).get(1) + beta*tSight.getPoint(1).get(1) + gamma*tSight.getPoint(2).get(1);
 		double z_p = alpha*tSight.getPoint(0).get(2) + beta*tSight.getPoint(1).get(2) + gamma*tSight.getPoint(2).get(2);
-		double p_sight[][] = {{x_p,y_p,-z_p}};
-		Array P_sight   = new Array(p_sight);
+		double pixelPoint_sight[][] = {{x_p,y_p,-z_p}};
+		Point PixelPointSight   = new Point(new Array(pixelPoint_sight));
 		
 		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {			
 			double value = this.zbuffer.getItem(i,j); 
-			if(P_sight.getItem(0,2) < value) {
+			if(PixelPointSight.get(2) < value) {
 				//draw point and save the new value
-				this.zbuffer.setItem(P_sight.getItem(0,2),i,j);
-				this.illuminationAndColloring(P_sight,tSight, baricords, i, j);
+				this.zbuffer.setItem(PixelPointSight.get(2),i,j);
+				this.illuminationAndColloring(PixelPointSight, baricords, tSight, i, j);
 			}
 			
 		}
@@ -477,32 +482,39 @@ public class OptionsControler implements Initializable{
 	 * @param baricords - Barycentric coordinates of the point
 	 * @return
 	 */
-	public Array computePointNormVector(Array triangle[],Array baricords) {
-	
-			Array v1 = Linear.subtraction(triangle[1], triangle[0]);
-			Array v2 = Linear.subtraction(triangle[2], triangle[0]);		
-			Array normVector = Linear.cross(v1, v2);					
+	public Array computePointNormVector(Point P,Triangle triangle,Point baricords) {
+			double n [][] = new double[1][3];
+			n[0][0] = (baricords.get(0)*triangle.getPoint(0).get(0)+
+					   baricords.get(1)*triangle.getPoint(1).get(0)+
+					   baricords.get(2)*triangle.getPoint(2).get(0));
+			
+			n[0][1] = (baricords.get(0)*triangle.getPoint(0).get(1)+
+					   baricords.get(1)*triangle.getPoint(1).get(1)+
+					   baricords.get(2)*triangle.getPoint(2).get(1));
+			
+			n[0][2] = (baricords.get(0)*triangle.getPoint(0).get(2)+
+					   baricords.get(1)*triangle.getPoint(1).get(2)+
+					   baricords.get(2)*triangle.getPoint(2).get(2));			
+			Array normVector = new Array(n);			
 			return normVector.normalization();
 	}
 	
-	public Array computeDifuseComponent(Array normVector,Array dotNL ) {
-		Array Id = new Array(1,3);		
-		Array Aux = Linear.componentwiseMultiplication(this.Il, this.Od);
-		Aux = Linear.componentwiseMultiplication(Aux,this.Kd);
-		Id = Linear.dotScalar(dotNL.getItem(0, 0), Aux);
+	public Point computeDifuseComponent(Array normVector,Array dotNL ) {
+		Point Id = new Point(new Array(1,3));		
+		Point Aux = PointOperations.componentwiseMultiplication(this.Il, this.Od);
+		Aux = PointOperations.componentwiseMultiplication(Aux,this.Kd);
+		Id = PointOperations.dotScalar(dotNL.getItem(0, 0), Aux);
 		return Id;
 	}
 	
 	
-	public Array computeSpecularComponent(Array R,Array L,Array vision) {			
-		Array Is = new Array(1,3);		
-		
-				
+	public Point computeSpecularComponent(Array R,Array L,Array vision) {			
+		Point Is = new Point(new Array(1,3));						
 		Array rvAngle = Linear.dot(R,vision.t());
 		if(rvAngle.getItem(0,0) > 0) {
 			double base = Math.pow(rvAngle.getItem(0, 0), this.Eta);
 			base = base*this.Ks;
-			Is = Linear.dotScalar(base, Il);
+			Is = PointOperations.dotScalar(base, this.Il);
 		}
 		return Is;
 	}
@@ -514,26 +526,27 @@ public class OptionsControler implements Initializable{
 	 * @param i - x position of the pixel on the screen
 	 * @param j - y position of the pixel on the screen
 	 */
-	public void illuminationAndColloring(Array P,Array triangle[],Array baricords,int i,int j) {
+	public void illuminationAndColloring(Point P,Point baricords,Triangle triangle,int i,int j) {
 		//defining origin
 		double originCoords[][] = {{0,0,0}};
-		Array origin = new Array(originCoords);
+		Point origin = new Point(new Array(originCoords));
 		
 		//Computing inportant vectors for Illumination and coloring calculations
-		Array normVector = computePointNormVector(triangle,baricords);
-		Array visionVector = Linear.subtraction(origin, P).normalization();
-		Array L = Linear.subtraction(this.Pl,P).normalization();
+		Array normVector = computePointNormVector(P,triangle,baricords);
+		P.setNormal(normVector);
+		Array visionVector = PointOperations.subtract(origin, P).getArray().normalization();
+		Array L = PointOperations.subtract(this.Pl,P).getArray().normalization();
 		
 		Array aux = Linear.dotScalar(2*Linear.dot(normVector, L.t()).getItem(0, 0),normVector);
 		Array R = Linear.subtraction(aux, L);
 		
 		
-		Array Ia = Linear.dotScalar(this.Ka, this.Iamb);					
+		Point Ia = PointOperations.dotScalar(this.Ka, this.Iamb);					
 		Array dotNL = Linear.dot(normVector, L.t());
 			
 		//Defining the difuse component Of light
-		Array Id = new Array(1,3);
-		Array Is = new Array(1,3);
+		Point Id = new Point(new Array(1,3));
+		Point Is = new Point(new Array(1,3));
 		
 		//Array dotNV= Linear.dot(normVector, vision.t());
 		
@@ -545,17 +558,15 @@ public class OptionsControler implements Initializable{
 		Id = this.computeDifuseComponent(normVector, dotNL);		
 		Is = this.computeSpecularComponent(R, L, visionVector);		
 		
-		Array Ipoint = Linear.sum(Linear.sum(Ia, Id),Is);
+		Point Ipoint = PointOperations.sum(PointOperations.sum(Ia, Id),Is);
 		//veryfing if any component of the point has a value greater than 255
 		//and setting it to 255
-		for(int k = 0; k < Ipoint.getRows_dim();k++) {
-			for(int l = 0; l < Ipoint.getDim();l++) {
-				if(Ipoint.getItem(k, l) > 255) {
-					Ipoint.setItem(255, k, l);
-				}
+		for(int k = 0; k < Ipoint.getArray().getDim();k++) {
+			if(Ipoint.get(k) > 255) {
+				Ipoint.set(255, k);
 			}			
 		}		
-		Color c = Color.rgb((int)Ipoint.getItem(0, 0),(int)Ipoint.getItem(0, 1),(int)Ipoint.getItem(0, 2));
+		Color c = Color.rgb((int)Ipoint.get(0),(int)Ipoint.get(1),(int)Ipoint.get(2));
 		this.gc.setFill(c);
 		this.gc.fillRect(i,j,1,1);
 		

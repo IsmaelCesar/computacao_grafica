@@ -18,6 +18,18 @@ public class PointOperations {
 		return result;
 	}
 	
+	public static double dot(Point p1,Point p2) {
+		double result = 0;
+		if(p1.getArray().getDim() == p2.getArray().getDim()) {
+			Array dotPoints  = Linear.dot(p1.getArray(), p2.getArray().t());
+			result = dotPoints.getItem(0, 0);			
+		}
+		else
+			throw new IllegalArgumentException("The columns dimentions of each point must match");
+		return result;
+		
+	}
+	
 	public static Point dotScalar(double lambda,Point p2) {
 		Point result;		
 		Array r = Linear.dotScalar(lambda, p2.getArray());
@@ -25,6 +37,12 @@ public class PointOperations {
 		return result;
 	}
 	
+	
+	public static Point componentwiseMultiplication(Point p1, Point p2) {
+		Array componentMul = Linear.componentwiseMultiplication(p1.getArray(), p2.getArray());
+		Point cMul = new Point(componentMul);
+		return cMul;
+	}
 	
 	public static Point calculateBarycenter(Point P, Point p1, Point p2, Point p3) {
 		Array b = Linear.getBarycentricCoordinates(P.getArray(), p1.getArray(), p2.getArray(), p3.getArray());

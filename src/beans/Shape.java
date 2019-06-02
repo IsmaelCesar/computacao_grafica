@@ -32,7 +32,7 @@ public class Shape {
 		for(int i = 0; i < t.length; i++) {
 			ps[i] = this.verticesW.get(i);
 		}		
-		this.triangles.set(this.control_triangles, new Triangle(ps[0],ps[1],ps[2]));
+		this.triangles.add(new Triangle(ps[0],ps[1],ps[2]));
 		this.triangle_indices[this.control_triangles++]= t;
 	}
 	
