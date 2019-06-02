@@ -418,7 +418,7 @@ public class OptionsControler implements Initializable{
 	 */
 	public void zbuffering(Point P,ArrayList<Point> tScreen,Triangle tSight,int i,int j) {
 		//The i and j represent the screen coordinates
-		//It recieves 3 arrays in order to calculat the baricentric coordinates
+		//It recieves 3 arrays in order to calculate the barycentric coordinates
 		Point baricords = PointOperations.calculateBarycenter(P, tScreen.get(0),tScreen.get(1), tScreen.get(2));
 		
 		//Getting sight coordinates for p
