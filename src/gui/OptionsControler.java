@@ -39,7 +39,7 @@ public class OptionsControler implements Initializable{
 	double height;
 	
 	ShapeReader sr = new ShapeReader();
-	private int selectedObj = 5;
+	private int selectedObj = 0;
 	String selectedShape= objects[this.selectedObj];
 	String tempSelected = objects[this.selectedObj];
 	//Current Shape
@@ -284,28 +284,6 @@ public class OptionsControler implements Initializable{
 		return value;		
 	}
 	
-//	public static Array[] applyOrthogonalProjectionToVertexSet(Shape s) {
-//		Array values [] = new Array[s.getVerticesW().length];		
-//		for(int i = 0; i<s.getVerticesW().length;i++) {
-//			values[i] = Projections.orthogonal(s.getVertex(i));
-//		}		
-//		return values;	
-//	}
-		
-//	public void compute_coordinates_and_draw_pixels_perspective(Shape s) {
-//		for(int i = 0; i < verticesSet.length;i++) {
-//			//projecting vertex
-//			Array aux = verticesSet[i];
-//			aux = Projections.applyPerspectiveTransformation(aux, this.C).t();
-//			aux = Projections.projectPerspective(aux,this.d,this.hx,this.hy).t();
-//			double k = Math.floor(((aux.getItem(0, 0)+1)/2)*(this.width)+0.5);
-//			double l = Math.floor(this.height - ((aux.getItem(0, 1)+1)/2)*(this.height) + 0.5);
-//			this.gc.setFill(Color.WHITE);
-//			this.gc.fillRect(k,l,1,1);
-//		}		
-//	}
-	
-	
 	/**
 	 * Iterates over all vertices in the triangle an sets the norm
 	 * of each point with summation of the norms of the triangle 
@@ -332,9 +310,10 @@ public class OptionsControler implements Initializable{
 		this.gc.setFill(Color.WHITE);
 		ArrayList<Triangle> sortedTs = this.sortTrianglesByBarycenter(s.getTriangles());		
 		int numTriangles= sortedTs.size();
-		for(int i = 0; i<numTriangles ;i++) {			
-			calculatePointwiseNormal(sortedTs,sortedTs.get(i));
-			rasterizeTriangle(sortedTs.get(i));			
+		for(int i = 0; i<numTriangles ;i++) {	
+			Triangle t = sortedTs.get(i);
+			calculatePointwiseNormal(sortedTs,t);
+			rasterizeTriangle(t);			
 		}		
 	}
 	
@@ -364,14 +343,20 @@ public class OptionsControler implements Initializable{
 			pointsScreen.set(j+1, el);
 		}
 		
+		//Gambiarra - DON'T TOUCH IT!
+		ArrayList<Point> pBar = new ArrayList<Point>();
+		pBar.add(pointsScreen.get(0));
+		pBar.add(pointsScreen.get(1));
+		pBar.add(pointsScreen.get(2));
+		//============================
+		
 		//calculate division point
 		Point division  = calculateTriangleDivisionPoint(pointsScreen);		
-		boolean isSwaped = false;
+		
 		if(pointsScreen.get(1).get(0) > division.get(0)) {
 			Point swap = pointsScreen.get(1);
 			pointsScreen.set(1, division);
 			division = swap;
-			isSwaped = true;
 		}
 		
 		//rasterizing first half of the triangle
@@ -387,27 +372,7 @@ public class OptionsControler implements Initializable{
 		double  xmax  = pointsScreen.get(0).get(0);
 		
 		//Creating array objects from points
-		Point a = pointsScreen.get(0);
-		//Setting an auxiliary variable for the third point of the triangle before taking the 
-		//division point
-		Point b_bar = pointsScreen.get(1); //Gambiarra - DON'T TOUCH IT!
-		
-		Point b = new Point(new Array(1,3));
-		if(isSwaped) {
-			b = division;
-		}	
-		else { 
-			b = pointsScreen.get(1);
-		}
-//		double c[][] = {screenCoordinates[2]};
-//		
-//		double a_sight [][] = {sightCoordinates[0]};
-//		double b_sight [][] = {sightCoordinates[1]};
-//		double c_sight [][] = {sightCoordinates[2]};
-//		
-//		Array triangleScreenCoords[] = {new Array(a),new Array(b_bar),new Array(c)};
-//		Array triangleSightCoords[]  = {new Array(a_sight),new Array(b_sight),new Array(c_sight),};
-		
+			
 		
 		for(int yscan=(int)pointsScreen.get(0).get(1); yscan<= pointsScreen.get(1).get(1);yscan++) {			
 			int min = (int)Math.floor(xmin+0.5);
@@ -416,7 +381,7 @@ public class OptionsControler implements Initializable{
 				
 				double p[][] = {{(double)j,(double)yscan}};
 				Point P = new Point(new Array(p));
-				this.zbuffering(P,pointsScreen,triangle,j,yscan);
+				this.zbuffering(P,pBar,triangle,j,yscan);
 			}
 			xmin += 1/(a1+epsilon);
 			xmax += 1/(a2+epsilon);
@@ -437,7 +402,7 @@ public class OptionsControler implements Initializable{
 			for(int j = min; j <= max; j++ ) {				
 				double p[][] = {{(double)j,(double)yscan}};
 				Point P = new Point(new Array(p));
-				this.zbuffering(P,pointsScreen,triangle,j,yscan);
+				this.zbuffering(P,pBar,triangle,j,yscan);
 			}			
 			xmin -= 1/(a1+epsilon);
 			xmax -= 1/(a2+epsilon);
@@ -472,7 +437,8 @@ public class OptionsControler implements Initializable{
 			if(PixelPointSight.get(2) < value) {
 				//draw point and save the new value
 				this.zbuffer.setItem(PixelPointSight.get(2),i,j);
-				this.illuminationAndColloring(PixelPointSight, baricords, tSight, i, j);
+				this.gc.fillRect(i, j, 1, 1);
+				//this.illuminationAndColloring(PixelPointSight, baricords, tSight, i, j);
 			}
 			
 		}

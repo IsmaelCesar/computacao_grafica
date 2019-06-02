@@ -77,6 +77,7 @@ public class Shape {
 			}
 			this.triangles.set(i, t);
 			this.triangles.get(i).calculateNormal();
+			this.triangles.get(i).calculateBarycenter();
 		}		
 	}
 	
