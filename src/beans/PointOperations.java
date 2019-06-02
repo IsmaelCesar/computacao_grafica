@@ -63,7 +63,7 @@ public class PointOperations {
 	}
 	
 	public static Point projectPerspective(Point p, double d, double hx, double hy) {
-		Array result = Linear.Projections.projectPerspective(p.getArray(), d, hx, hy);
+		Array result = Linear.Projections.projectPerspective(p.getArray(), d, hx, hy).t();
 		Point projectedPoint = new Point(result);
 		return projectedPoint;
 	}

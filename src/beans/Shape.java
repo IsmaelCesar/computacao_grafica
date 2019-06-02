@@ -66,14 +66,14 @@ public class Shape {
 	public void convertFromWorldToSight(Point C) {
 		
 		for(int i = 0; i < this.n_vertices;i++) {
-			this.verticesS.set(i,PointOperations.applyPerspectiveTransform(this.verticesW.get(i), C));
+			this.verticesS.add(PointOperations.applyPerspectiveTransform(this.verticesW.get(i), C));
 		}
 		Triangle t = null;
 		for(int i =0; i < this.n_triangles;i++) {
 			int t_idx[] = this.triangle_indices[0];
 			t = this.triangles.get(i);
 			for (int j=0; j < t_idx.length;j++) {
-				t.setPoint(verticesS.get(t_idx[j]), j);
+				t.setPoint(verticesS.get(t_idx[j]-1), j);
 			}
 			this.triangles.set(i, t);
 			this.triangles.get(i).calculateNormal();

@@ -204,6 +204,8 @@ public class OptionsControler implements Initializable{
 	
 	public void drawDefaultShape() {
 		Shape s = sr.read(this.selectedShape);
+		PointOperations.computePerspective(this.pN, this.pV);
+		s.convertFromWorldToSight(this.pC);
 		iterateOverTriangles(s);
 	}
 	
