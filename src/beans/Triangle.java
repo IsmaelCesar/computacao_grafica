@@ -81,7 +81,12 @@ public class Triangle {
 		}
 		value += ">";
 		return value;			
-	}
+	}	
 	
+	public Triangle[] toArray() {
+		Triangle t[] = new Triangle[1];
+		t[0] = this;
+		return t;
+	}
 	
 }

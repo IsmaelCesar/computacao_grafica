@@ -125,68 +125,68 @@ public class Linear {
 		return det;
 	}
 	
-	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {
-		Array result = null;
-		A = transpose_for_procedure(A);
-		B = transpose_for_procedure(B);
-		C = transpose_for_procedure(C);
-		P = transpose_for_procedure(P);
-		
-		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
-			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {				
-				//creating matrix
-				Array T = new Array(A.getDim(),B.getDim());
-				double aux [][] = {{P.getItem(0, 0) - C.getItem(0, 0),P.getItem(0, 1) - C.getItem(0, 1)}};
-				Array Aux = new Array(aux);
-				T.setItem(A.getItem(0, 0) - C.getItem(0,0), 0, 0);
-				T.setItem(B.getItem(0, 0) - C.getItem(0,0), 0, 1);				
-				T.setItem(A.getItem(0, 1) - C.getItem(0,1), 1, 0);
-				T.setItem(B.getItem(0, 1) - C.getItem(0,1), 1, 1);
-				
-				//creating inverse matrix
-				double t_inv[][] = {{T.getItem(1,1),-T.getItem(0,1)},
-									{-T.getItem(1, 0),T.getItem(0,0)}};
-				
-				double epsilon =0.0000001;
-				Array T_inv = new Array(t_inv);
-				T_inv = dotScalar(1/(determinant(T)+epsilon),T_inv);
-				
-				Array values = dot(T_inv, Aux.t());
-				values = values.t();
-				double psi =1 - values.getItem(0, 0) - values.getItem(0,1);
-				Array baricords = new Array(1,3);
-				baricords.setItem(values.getItem(0, 0), 0, 0);
-				baricords.setItem(values.getItem(0, 1), 0, 1);
-				baricords.setItem(psi, 0, 2);
-				result = baricords;
-			}
-		}
-		return result;		
-	}
-	
-	//fabio
 //	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {
 //		Array result = null;
 //		A = transpose_for_procedure(A);
 //		B = transpose_for_procedure(B);
 //		C = transpose_for_procedure(C);
-//		P = transpose_for_procedure(P);		
+//		P = transpose_for_procedure(P);
+//		
 //		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
-//			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {
-//				Array v0 = subtraction(B,A);
-//				Array v1 = subtraction(C,A);
-//				Array v2 = subtraction(P,A);
-//			
-//				double partial = v0.getItem(0, 0)*v1.getItem(0, 1) -v1.getItem(0, 0)*v0.getItem(0, 1);
-//				double alpha = (v2.getItem(0, 0)*v1.getItem(0, 1) - v1.getItem(0, 0)*v0.getItem(0, 1))/partial;
-//				double beta = (v0.getItem(0, 0)*v2.getItem(0, 1) - v2.getItem(0, 0)*v0.getItem(0, 1))/partial;
-//				double gamma = 1.0 - alpha - beta;
-//				double psi [][] = {{alpha,beta,gamma}};
-//				result = new Array(psi);				
+//			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {				
+//				//creating matrix
+//				Array T = new Array(A.getDim(),B.getDim());
+//				double aux [][] = {{P.getItem(0, 0) - C.getItem(0, 0),P.getItem(0, 1) - C.getItem(0, 1)}};
+//				Array Aux = new Array(aux);
+//				T.setItem(A.getItem(0, 0) - C.getItem(0,0), 0, 0);
+//				T.setItem(B.getItem(0, 0) - C.getItem(0,0), 0, 1);				
+//				T.setItem(A.getItem(0, 1) - C.getItem(0,1), 1, 0);
+//				T.setItem(B.getItem(0, 1) - C.getItem(0,1), 1, 1);
+//				
+//				//creating inverse matrix
+//				double t_inv[][] = {{T.getItem(1,1),-T.getItem(0,1)},
+//									{-T.getItem(1, 0),T.getItem(0,0)}};
+//				
+//				double epsilon =0.0000001;
+//				Array T_inv = new Array(t_inv);
+//				T_inv = dotScalar(1/(determinant(T)+epsilon),T_inv);
+//				
+//				Array values = dot(T_inv, Aux.t());
+//				values = values.t();
+//				double psi =1 - values.getItem(0, 0) - values.getItem(0,1);
+//				Array baricords = new Array(1,3);
+//				baricords.setItem(values.getItem(0, 0), 0, 0);
+//				baricords.setItem(values.getItem(0, 1), 0, 1);
+//				baricords.setItem(psi, 0, 2);
+//				result = baricords;
 //			}
-//		}		
-//		return result;
+//		}
+//		return result;		
 //	}
+	
+	//fabio
+	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {
+		Array result = null;
+		A = transpose_for_procedure(A);
+		B = transpose_for_procedure(B);
+		C = transpose_for_procedure(C);
+		P = transpose_for_procedure(P);		
+		if(A.getRows_dim() ==1 && B.getRows_dim() ==1 && C.getRows_dim() ==1 ) {			
+			if(A.getDim() == B.getDim()	&& A.getDim() == C.getDim() ) {
+				Array v0 = subtraction(B,A);
+				Array v1 = subtraction(C,A);
+				Array v2 = subtraction(P,A);
+			
+				double partial = v0.getItem(0, 0)*v1.getItem(0, 1) -v1.getItem(0, 0)*v0.getItem(0, 1);
+				double alpha = (v2.getItem(0, 0)*v1.getItem(0, 1) - v1.getItem(0, 0)*v0.getItem(0, 1))/partial;
+				double beta = (v0.getItem(0, 0)*v2.getItem(0, 1) - v2.getItem(0, 0)*v0.getItem(0, 1))/partial;
+				double gamma = 1.0 - alpha - beta;
+				double psi [][] = {{alpha,beta,gamma}};
+				result = new Array(psi);				
+			}
+		}		
+		return result;
+	}
 	
 	//lucas
 //	public static Array getBarycentricCoordinates(Array P,Array A,Array B, Array C) {

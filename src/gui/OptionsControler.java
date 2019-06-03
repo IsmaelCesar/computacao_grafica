@@ -252,6 +252,7 @@ public class OptionsControler implements Initializable{
 		this.hy = this.readScalarsFromTextField(this.txtFieldHY);
 		this.d = this.readScalarsFromTextField(this.txtFieldD);		
 		PointOperations.computePerspective(this.pN, this.pV);
+		
 		this.zbuffer = new Array(initializeZbufferMatrix((int)width,(int)height));
 		
 		ShapeReader sr = new ShapeReader();
@@ -308,7 +309,8 @@ public class OptionsControler implements Initializable{
 	//Rasterize
 	public void iterateOverTriangles(Shape s) {
 		this.gc.setFill(Color.WHITE);
-		ArrayList<Triangle> sortedTs = this.sortTrianglesByBarycenter(s.getTriangles());		
+		//ArrayList<Triangle> sortedTs = this.sortTrianglesByBarycenter(s.getTriangles());
+		ArrayList<Triangle> sortedTs = s.getTriangles();
 		int numTriangles= sortedTs.size();
 		for(int i = 0; i<numTriangles ;i++) {	
 			Triangle t = sortedTs.get(i);

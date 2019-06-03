@@ -6,7 +6,6 @@ public class Shape {
 	
 	private int n_vertices;
 	private int n_triangles;
-	private int control_vertices =0;
 	private int control_triangles=0;
 	private ArrayList<Point> verticesW;//Vertices in world Coordinates	
 	private ArrayList<Point> verticesS;//Vertices in sight Coordinates
@@ -23,14 +22,13 @@ public class Shape {
 	}
 	
 	public void addVertex(Array v) {
-		this.control_vertices++;
 		this.verticesW.add(new Point(v));		
 	}
 	
 	public void addTriangle(int t[]) {
 		Point ps[] = new Point[t.length];
 		for(int i = 0; i < t.length; i++) {
-			ps[i] = this.verticesW.get(i);
+			ps[i] = this.verticesW.get(t[i]-1);
 		}		
 		this.triangles.add(new Triangle(ps[0],ps[1],ps[2]));
 		this.triangle_indices[this.control_triangles++]= t;
@@ -73,9 +71,9 @@ public class Shape {
 			int t_idx[] = this.triangle_indices[0];
 			t = this.triangles.get(i);
 			for (int j=0; j < t_idx.length;j++) {
-				t.setPoint(verticesS.get(t_idx[j]-1), j);
+				t.setPoint(verticesS.get(t_idx[j]), j);
 			}
-			this.triangles.set(i, t);
+			this.triangles.set(i,t);
 			this.triangles.get(i).calculateNormal();
 			this.triangles.get(i).calculateBarycenter();
 		}		
@@ -86,6 +84,5 @@ public class Shape {
 			this.triangles.get(i).calculateBarycenter();
 		}
 	}
-	
 	
 }

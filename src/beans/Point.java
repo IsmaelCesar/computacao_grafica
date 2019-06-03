@@ -63,5 +63,11 @@ public class Point {
 		}
 		return result;
 	}
+	
+	public Point[] toArray() {
+		Point p[] = new Point[1];
+		p[0] = this;
+		return p;
+	}
 
 }
