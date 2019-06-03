@@ -534,7 +534,10 @@ public class OptionsControler implements Initializable{
 		if(dotNL.getItem(0,0)< 0) {
 			if(dotNV.getItem(0, 0) < 0) {
 				normVector = Linear.dotScalar(-1,normVector);
-				dotNL = Linear.dot(normVector,L.t());		
+				dotNL = Linear.dot(normVector,L.t());
+				//Recalculating R
+				aux  = Linear.dotScalar(2*Linear.dot(normVector, L.t()).getItem(0, 0),normVector);
+				R = Linear.subtraction(aux, L);
 			}
 			else
 				positiveNV = false;
