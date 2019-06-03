@@ -332,7 +332,7 @@ public class OptionsControler implements Initializable{
 			pointsScreen.add(new Point(screenCoordinates[k]));
 		}
 		
-		// RASTERIZE TRIANGLES
+		// RASTERIZE TRIANGLESKd
 		//sort triangles by height
 		for(int k =1;k < pointsScreen.size(); k++) {
 			int j = k-1;
@@ -467,15 +467,27 @@ public class OptionsControler implements Initializable{
 			return normVector.normalization();
 	}
 	
+	
+	/**
+	 * 
+	 * @param normVector - norm of the point
+	 * @param dotNL      - the dot product between the norm and the light vector
+	 * @return Point with the difuzed component calculated
+	 */
 	public Point computeDifuseComponent(Array normVector,Array dotNL ) {
 		Point Id = new Point(new Array(1,3));		
-		Point Aux = PointOperations.componentwiseMultiplication(this.Il, this.Od);
-		Aux = PointOperations.componentwiseMultiplication(Aux,this.Kd);
-		Id = PointOperations.dotScalar(dotNL.getItem(0, 0), Aux);
+		Point a = PointOperations.dotScalar(dotNL.getItem(0, 0), this.Kd);
+		Point b = PointOperations.componentwiseMultiplication(a, this.Od);
+		Id = PointOperations.componentwiseMultiplication(b,this.Il);
 		return Id;
 	}
 	
-	
+	/**
+	 * @param R  - Reflection vector
+	 * @param L  - Vector that points to the light source
+	 * @param vision - Vector that points to the Viewer
+	 * @return Point with the specular component calculated
+	 */
 	public Point computeSpecularComponent(Array R,Array L,Array vision) {			
 		Point Is = new Point(new Array(1,3));						
 		Array rvAngle = Linear.dot(R,vision.t());
@@ -515,16 +527,23 @@ public class OptionsControler implements Initializable{
 		//Defining the difuse component Of light
 		Point Id = new Point(new Array(1,3));
 		Point Is = new Point(new Array(1,3));
+		boolean positiveNV = true;
 		
-		//Array dotNV= Linear.dot(normVector, vision.t());
+		Array dotNV= Linear.dot(normVector, visionVector.t());
 		
-		if(dotNL.getItem(0, 0) < 0) {
-			normVector = Linear.dotScalar(-1,normVector);
-			dotNL = Linear.dot(normVector,L.t());				
-		}					
-		
-		Id = this.computeDifuseComponent(normVector, dotNL);		
-		Is = this.computeSpecularComponent(R, L, visionVector);		
+		if(dotNL.getItem(0,0)< 0) {
+			if(dotNV.getItem(0, 0) < 0) {
+				normVector = Linear.dotScalar(-1,normVector);
+				dotNL = Linear.dot(normVector,L.t());		
+			}
+			else
+				positiveNV = false;
+		}
+	
+		if(positiveNV) {
+			Id = this.computeDifuseComponent(normVector, dotNL);		
+			Is = this.computeSpecularComponent(R, L, visionVector);
+		}
 		
 		Point Ipoint = PointOperations.sum(PointOperations.sum(Ia, Id),Is);
 		//veryfing if any component of the point has a value greater than 255
