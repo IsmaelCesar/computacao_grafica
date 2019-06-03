@@ -309,8 +309,7 @@ public class OptionsControler implements Initializable{
 	//Rasterize
 	public void iterateOverTriangles(Shape s) {
 		this.gc.setFill(Color.WHITE);
-		//ArrayList<Triangle> sortedTs = this.sortTrianglesByBarycenter(s.getTriangles());
-		ArrayList<Triangle> sortedTs = s.getTriangles();
+		ArrayList<Triangle> sortedTs = this.sortTrianglesByBarycenter(s.getTriangles());
 		int numTriangles= sortedTs.size();
 		for(int i = 0; i<numTriangles ;i++) {	
 			Triangle t = sortedTs.get(i);
@@ -431,7 +430,7 @@ public class OptionsControler implements Initializable{
 		double x_p = alpha*tSight.getPoint(0).get(0) + beta*tSight.getPoint(1).get(0) + gamma*tSight.getPoint(2).get(0);
 		double y_p = alpha*tSight.getPoint(0).get(1) + beta*tSight.getPoint(1).get(1) + gamma*tSight.getPoint(2).get(1);
 		double z_p = alpha*tSight.getPoint(0).get(2) + beta*tSight.getPoint(1).get(2) + gamma*tSight.getPoint(2).get(2);
-		double pixelPoint_sight[][] = {{x_p,y_p,-z_p}};
+		double pixelPoint_sight[][] = {{x_p,y_p,z_p}};
 		Point PixelPointSight   = new Point(new Array(pixelPoint_sight));
 		
 		if((i>=0 && j >= 0) && (i< this.width && j < this.height)) {			
@@ -439,8 +438,7 @@ public class OptionsControler implements Initializable{
 			if(PixelPointSight.get(2) < value) {
 				//draw point and save the new value
 				this.zbuffer.setItem(PixelPointSight.get(2),i,j);
-				this.gc.fillRect(i, j, 1, 1);
-				//this.illuminationAndColloring(PixelPointSight, baricords, tSight, i, j);
+				this.illuminationAndColloring(PixelPointSight, baricords, tSight, i, j);
 			}
 			
 		}
@@ -454,17 +452,17 @@ public class OptionsControler implements Initializable{
 	 */
 	public Array computePointNormVector(Point P,Triangle triangle,Point baricords) {
 			double n [][] = new double[1][3];
-			n[0][0] = (baricords.get(0)*triangle.getPoint(0).get(0)+
-					   baricords.get(1)*triangle.getPoint(1).get(0)+
-					   baricords.get(2)*triangle.getPoint(2).get(0));
+			n[0][0] = (baricords.get(0)*triangle.getPoint(0).getNormal().getItem(0, 0)+
+					   baricords.get(1)*triangle.getPoint(1).getNormal().getItem(0, 0)+
+					   baricords.get(2)*triangle.getPoint(2).getNormal().getItem(0, 0));
 			
-			n[0][1] = (baricords.get(0)*triangle.getPoint(0).get(1)+
-					   baricords.get(1)*triangle.getPoint(1).get(1)+
-					   baricords.get(2)*triangle.getPoint(2).get(1));
+			n[0][1] = (baricords.get(0)*triangle.getPoint(0).getNormal().getItem(0, 1)+
+					   baricords.get(1)*triangle.getPoint(1).getNormal().getItem(0, 1)+
+					   baricords.get(2)*triangle.getPoint(2).getNormal().getItem(0, 1));
 			
-			n[0][2] = (baricords.get(0)*triangle.getPoint(0).get(2)+
-					   baricords.get(1)*triangle.getPoint(1).get(2)+
-					   baricords.get(2)*triangle.getPoint(2).get(2));			
+			n[0][2] = (baricords.get(0)*triangle.getPoint(0).getNormal().getItem(0, 2)+
+					   baricords.get(1)*triangle.getPoint(1).getNormal().getItem(0, 2)+
+					   baricords.get(2)*triangle.getPoint(2).getNormal().getItem(0, 2));			
 			Array normVector = new Array(n);			
 			return normVector.normalization();
 	}
