@@ -488,7 +488,7 @@ public class OptionsControler implements Initializable{
 	 * @param vision - Vector that points to the Viewer
 	 * @return Point with the specular component calculated
 	 */
-	public Point computeSpecularComponent(Array R,Array L,Array vision) {			
+	public Point computeSpecularComponent(Array R,Array vision) {			
 		Point Is = new Point(new Array(1,3));						
 		Array rvAngle = Linear.dot(R,vision.t());
 		if(rvAngle.getItem(0,0) > 0) {
@@ -524,7 +524,7 @@ public class OptionsControler implements Initializable{
 		Point Ia = PointOperations.dotScalar(this.Ka, this.Iamb);					
 		Array dotNL = Linear.dot(normVector, L.t());
 			
-		//Defining the difuse component Of light
+		//Defining the difuse component Of lightArray L,
 		Point Id = new Point(new Array(1,3));
 		Point Is = new Point(new Array(1,3));
 		boolean positiveNV = true;
@@ -542,7 +542,7 @@ public class OptionsControler implements Initializable{
 	
 		if(positiveNV) {
 			Id = this.computeDifuseComponent(normVector, dotNL);		
-			Is = this.computeSpecularComponent(R, L, visionVector);
+			Is = this.computeSpecularComponent(R, visionVector);
 		}
 		
 		Point Ipoint = PointOperations.sum(PointOperations.sum(Ia, Id),Is);
