@@ -8,7 +8,7 @@ public class ShapeReader {
 	private int n_triangles;
 	
 	public ShapeReader() {
-		filePath = "/home/ismael/Documentos/Github/computacao_grafica/objects/";
+		filePath = "../objects/";
 	}
 	
 	public Shape read(String fileName) {
